@@ -1,0 +1,93 @@
+{
+  "study_id": "study_progressive_v2_60_alpha05_runpod_a40_20260312",
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "primary_endpoint": "exact_correct",
+  "primary_test": "mcnemar_exact_twosided",
+  "n_cases": 60,
+  "n_discordant_correctness": 33,
+  "phi_accuracy": 0.5166666666666667,
+  "qwen_accuracy": 0.2,
+  "delta_accuracy": 0.3166666666666667,
+  "ci95_delta_accuracy": [
+    0.15,
+    0.48333333333333334
+  ],
+  "ci_method": "bootstrap_percentile_10000",
+  "p_primary": 0.0013187271542847157,
+  "phi_parse_rate": 1.0,
+  "qwen_parse_rate": 1.0,
+  "delta_parse_rate": 0.0,
+  "p_parse": 1.0,
+  "phi_latency_ms_mean": 12133.009194990154,
+  "qwen_latency_ms_mean": 1542.1960981252294,
+  "phi_latency_ms_median": 12227.19639656134,
+  "qwen_latency_ms_median": 1017.2594554023817,
+  "hl_delta_latency_ms": 11060.876789386384,
+  "p_latency": 1.6295557943119345e-11,
+  "family_breakdown": [
+    {
+      "family": "code_complex",
+      "n": 10,
+      "phi_accuracy": 1.0,
+      "qwen_accuracy": 0.2,
+      "phi_parse_rate": 1.0,
+      "qwen_parse_rate": 1.0,
+      "phi_latency_ms_mean": 12490.593536500819,
+      "qwen_latency_ms_mean": 1047.9244319722056
+    },
+    {
+      "family": "code_simple",
+      "n": 10,
+      "phi_accuracy": 0.0,
+      "qwen_accuracy": 0.0,
+      "phi_parse_rate": 1.0,
+      "qwen_parse_rate": 1.0,
+      "phi_latency_ms_mean": 12303.093828377314,
+      "qwen_latency_ms_mean": 964.0186410630122
+    },
+    {
+      "family": "cot_complex",
+      "n": 10,
+      "phi_accuracy": 1.0,
+      "qwen_accuracy": 0.0,
+      "phi_parse_rate": 1.0,
+      "qwen_parse_rate": 1.0,
+      "phi_latency_ms_mean": 12179.828102141619,
+      "qwen_latency_ms_mean": 2467.2369421692565
+    },
+    {
+      "family": "cot_simple",
+      "n": 10,
+      "phi_accuracy": 0.8,
+      "qwen_accuracy": 0.0,
+      "phi_parse_rate": 1.0,
+      "qwen_parse_rate": 1.0,
+      "phi_latency_ms_mean": 11525.427762488835,
+      "qwen_latency_ms_mean": 1118.0589728290215
+    },
+    {
+      "family": "hybrid_agentic",
+      "n": 10,
+      "phi_accuracy": 0.3,
+      "qwen_accuracy": 1.0,
+      "phi_parse_rate": 1.0,
+      "qwen_parse_rate": 1.0,
+      "phi_latency_ms_mean": 12378.513198671862,
+      "qwen_latency_ms_mean": 903.7605202291161
+    },
+    {
+      "family": "hybrid_generative",
+      "n": 10,
+      "phi_accuracy": 0.0,
+      "qwen_accuracy": 0.0,
+      "phi_parse_rate": 1.0,
+      "qwen_parse_rate": 1.0,
+      "phi_latency_ms_mean": 11920.598741760477,
+      "qwen_latency_ms_mean": 2752.1770804887637
+    }
+  ],
+  "interim_or_final": "pilot",
+  "recommended_next_n": 55,
+  "result": "overall_significant"
+}

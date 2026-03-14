@@ -1,0 +1,14 @@
+{
+  "study_id": "study_progressive_v2_60_alpha05_runpod_a40_20260312",
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "benchmark_contract": "jsonsafe_cls_tokens_128",
+  "corpus_version": "progressive_v2_60",
+  "corpus_sha256": "3be755e8711dd83780c733ea74176f88d45cc5eae4777a0500697a0fa1550bd2",
+  "primary_endpoint": "exact_correct",
+  "primary_test": "mcnemar_exact_twosided",
+  "secondary_tests": [
+    "parse:mcnemar_exact_twosided",
+    "latency:wilcoxon_twosided"
+  ]
+}

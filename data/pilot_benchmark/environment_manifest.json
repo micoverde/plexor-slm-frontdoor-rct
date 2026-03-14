@@ -1,0 +1,13 @@
+{
+  "hostname": "unknown",
+  "provider": "unknown",
+  "hardware": "unknown",
+  "cuda_version": "unknown",
+  "driver_version": "unknown",
+  "python_version": "3.11.10",
+  "torch_version": "unknown",
+  "transformers_version": "unknown",
+  "mlflow_version": "unknown",
+  "git_sha": "unknown",
+  "container_image": "unknown"
+}

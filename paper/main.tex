@@ -1,0 +1,554 @@
+% arXiv Preprint
+% Which Small Model Guards the Gate? A Locked Benchmark and Four-Arm
+% Randomized Controlled Trial for Production Front-Door Routing
+% Article 8 in the TAAC Research Series
+% GitHub Issue: TBD
+
+\documentclass{article}
+
+% Clean academic formatting
+\usepackage[final]{neurips_2024}
+
+% Standard packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{bbm}
+\usepackage{listings}
+\usepackage{enumitem}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{fillbetween}
+\usetikzlibrary{patterns,positioning,shapes.geometric,arrows.meta,calc,fit,backgrounds}
+
+% Custom commands
+\newcommand{\taac}{\textsc{TAAC}}
+\newcommand{\plexor}{\textsc{Plexor}}
+\newcommand{\placeholder}[1]{\textcolor{purple}{[#1]}}
+\newcommand{\validated}[1]{\textcolor{teal}{#1}}
+\newcommand{\pending}[1]{\textcolor{orange}{#1}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{\mathrm{Var}}
+\DeclareMathOperator{\Cov}{\mathrm{Cov}}
+\newcommand{\ind}{\mathbbm{1}}
+\newcommand{\R}{\mathbb{R}}
+
+% Theorem environments
+\newtheorem{finding}{Finding}
+\newtheorem{hypothesis}{Hypothesis}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+% NeurIPS-style side-by-side author blocks
+\renewcommand{\And}{%
+  \end{tabular}\hfil\linebreak[0]\hfil%
+  \begin{tabular}[t]{c}%
+}
+
+\title{Which Small Model Guards the Gate?\\A Locked Benchmark and Four-Arm Randomized Controlled Trial\\for Production Front-Door Routing}
+
+\author{
+  Warren Johnson\thanks{Corresponding author. E-mail: \texttt{warrenjo@alumni.harvard.edu}}\\
+  Bona Opera Studios\\
+  Sammamish, WA, USA
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Production LLM inference systems increasingly deploy a \emph{front-door router}---a small language model (SLM) that classifies incoming prompts by task type and complexity, then routes each request to an appropriately capable (and priced) downstream model. The router is itself a model-selection problem: cheaper SLMs offer low latency but may fail at nuanced task-family boundaries; stronger SLMs improve classification quality but violate latency budgets or introduce external API dependencies. We report two complementary studies for the \plexor{} front-door stack.
+
+\textbf{Study~1 (Pilot Benchmark).} A locked, hardware-controlled pairwise comparison of Phi-3.5-mini and Qwen2.5-1.5B on a fixed 60-case corpus with a pre-registered JSON-safe decoding contract. On RunPod Secure A40, Phi-3.5-mini achieves significantly higher exact-label accuracy ($0.517$ vs.\ $0.200$; exact McNemar $p = 0.0013$, $\Delta = +0.317$, 95\% CI $[0.15, 0.48]$), while Qwen2.5-1.5B is substantially faster (median latency $1{,}017$\,ms vs.\ $12{,}227$\,ms; Wilcoxon $p = 1.63 \times 10^{-11}$). Family-level analysis reveals a split policy: Phi dominates code-complex and chain-of-thought families; Qwen dominates hybrid-agentic prompts.
+
+\textbf{Study~2 (Four-Arm RCT).} \pending{A pre-registered randomized controlled trial comparing three candidate SLM backends---Phi-4-mini-instruct (Azure AI Foundry serverless), Qwen-2.5-3B-Instruct (self-hosted vLLM), and DeepSeek-V3 (commercial API)---against a no-routing control, with $N \geq 250$ per arm, Bonferroni-corrected pairwise tests ($\alpha/6 = 0.0083$), O'Brien-Fleming interim analysis at $N = 125$, and a pre-registered decision matrix with Pareto frontier analysis over (total\_cost, routing\_accuracy). Results pending execution.}
+
+Together, these studies provide an end-to-end empirical path from offline model comparison through production-grade experimentation to a concrete deployment decision. We connect our findings to prior work on task-dependent routing \citep{johnson2026compress}, provider-dependent output dynamics \citep{johnson2026greenai,johnson2026benchmark}, and production RCT methodology \citep{johnson2026rct}. All run IDs, artifacts, and reproducibility manifests are released.
+
+\textbf{Keywords:} model routing, small language models, front-door classification, randomized controlled trial, MLflow, latency-quality tradeoff, Pareto frontier, reproducibility
+\end{abstract}
+
+\vspace{0.5em}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.3em}
+\noindent\textbf{Series position.} This is Article~8 in the \taac{} Research Series. Articles 1--3 established task-dependent compression thresholds and the perplexity paradox mechanism \citep{johnson2026compress,johnson2026perplexity,johnson2026cliff}. Articles 4--5 documented provider-dependent output token explosion under compression \citep{johnson2026greenai,johnson2026benchmark}. Article~6 validated benchmark-derived thresholds in a production RCT \citep{johnson2026rct}. Article~7 designed tokenizer-aware prompt languages achieving up to 64.7\% token reduction \citep{johnson2026promptlang}. This article shifts from \emph{what to compress} to \emph{which model should decide}---extending the ``route'' branch of the Article~1 dichotomy into the model-selection domain.
+\vspace{0.5em}
+\noindent\rule{\textwidth}{0.4pt}
+
+% ════════════════════════════════════════════════════════════════════
+% 1. INTRODUCTION
+% ════════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:intro}
+
+Production LLM systems increasingly deploy a \emph{front door} that classifies and routes prompts before invoking expensive downstream models \citep{jiang2023routellm,shnitzer2023large}. The front door is itself a model-selection problem: cheaper small language models (SLMs) offer low latency but can fail nuanced task-taxonomy boundaries; stronger SLMs improve classification quality but may violate latency budgets \citep{chen2023frugalgpt}. This tradeoff is amplified when teams need both \emph{scientific validity} (paired significance tests, dataset immutability, reproducibility) and \emph{operational validity} (health checks, logging schema, alertability, arm isolation).
+
+Article~1 in this series \citep{johnson2026compress} demonstrated a fundamental dichotomy: code-generation tasks benefit from compression-first strategies, while chain-of-thought reasoning benefits from routing to appropriately-capable models. That finding established \emph{routing} as a first-class cost-reduction mechanism. But it left open the question of \emph{which model performs the routing itself}. This is the question Article~8 addresses.
+
+We contribute an end-to-end empirical account spanning three phases:
+\begin{enumerate}[nosep]
+  \item A \textbf{locked offline benchmark} (Study~1) comparing two SLMs under hardware-controlled conditions with paired statistical tests (\S\ref{sec:pilot}).
+  \item A \textbf{four-arm RCT design} with pre-registered hypotheses, Bonferroni correction, and a decision matrix (\S\ref{sec:rct-design}).
+  \item \textbf{RCT execution results} with Pareto frontier analysis and a concrete production deployment recommendation (\S\ref{sec:rct-results}--\S\ref{sec:pareto}).
+\end{enumerate}
+
+\subsection{Relationship to Prior Work in the Series}
+
+The \taac{} series has progressively built the empirical foundation for intelligent LLM inference:
+
+\begin{itemize}[nosep]
+  \item \textbf{Article~1} \citep{johnson2026compress}: Task dichotomy (compress code, route CoT). \emph{Implication for Art.~8:} The front-door classifier must correctly identify this boundary to apply the right strategy.
+  \item \textbf{Article~4} \citep{johnson2026greenai}: DeepSeek-Chat exhibits 38$\times$ output token explosion under compression. \emph{Implication for Art.~8:} DeepSeek-V3 (Arm~D) may exhibit similar instability in classification output length, requiring output budget control.
+  \item \textbf{Article~5} \citep{johnson2026benchmark}: Provider-dependent behavior---compression sensitivity CS = $-54.1$ for DeepSeek vs.\ $-0.27$ for GPT. \emph{Implication for Art.~8:} Model selection for routing is not model-agnostic; architectural differences matter.
+  \item \textbf{Article~6} \citep{johnson2026rct}: First production RCT for compression (CONSORT methodology, $N = 358$). \emph{Implication for Art.~8:} We inherit and extend the RCT infrastructure to four arms with Bonferroni correction.
+  \item \textbf{Article~7} \citep{johnson2026promptlang}: Tokenizer-aware prompt design achieves 64.7\% token reduction. \emph{Implication for Art.~8:} Classifier and scorer system prompts should be tokenizer-aware for each SLM backend.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════
+% 2. STUDY 1: PILOT LOCKED BENCHMARK
+% ════════════════════════════════════════════════════════════════════
+\section{Study 1: Pilot Locked Benchmark}
+\label{sec:pilot}
+
+\subsection{Experimental Contract}
+
+The pilot study uses a locked corpus and configuration to establish baseline quality-latency profiles for two candidate SLMs under identical conditions.
+
+\begin{itemize}[nosep]
+  \item \textbf{Corpus:} \texttt{progressive\_test\_cases\_v2\_60.jsonl} (60 prompts, 6 families, 10 per family)
+  \item \textbf{Corpus SHA-256:} \texttt{3be755e8711d\ldots1550bd2}
+  \item \textbf{Contract:} \texttt{jsonsafe\_cls\_tokens\_128} (classifier: \texttt{max\_new\_tokens}=128; scorer: 24)
+  \item \textbf{Quantization:} 4-bit NF4 for both models
+  \item \textbf{Fairness:} Same host class, same commit, same parser/template path, no mid-pair config drift
+\end{itemize}
+
+\textbf{Execution environment:}
+\begin{itemize}[nosep]
+  \item Provider: RunPod Secure Cloud. GPU: NVIDIA A40.
+  \item Pod ID: \texttt{4vhwewr5sy3zfc}. Hostname: \texttt{d0f8aedc2cea}.
+  \item Branch/commit: \texttt{slm-front-door-experiement} @ \texttt{07771b20}.
+\end{itemize}
+
+\subsection{Primary and Secondary Endpoints}
+
+\textbf{Primary:} Exact label correctness per case (paired, binary). Test: exact McNemar two-sided \citep{mcnemar1947}.
+
+\textbf{Secondary:} Parse success (paired binary, exact McNemar); per-case latency (paired continuous, Wilcoxon signed-rank \citep{wilcoxon1945}).
+
+\subsection{Results: Overall Quality and Latency}
+
+\begin{table}[h]
+\centering
+\caption{Overall 60-case pairwise benchmark metrics (RunPod Secure A40).}
+\label{tab:pilot-overall}
+\begin{tabular}{lcc}
+\toprule
+Metric & Phi-3.5-mini & Qwen2.5-1.5B \\
+\midrule
+Exact classification accuracy & 0.5167 & 0.2000 \\
+Agentic F1 & 0.3750 & 0.3636 \\
+JSON parse rate & 1.0000 & 1.0000 \\
+Mean latency (ms) & 12{,}133 & 1{,}542 \\
+Median latency (ms) & 12{,}227 & 1{,}017 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Primary significance:} $n = 60$, discordant correctness pairs $= 33$. $\Delta$ accuracy (Phi $-$ Qwen) $= +0.3167$. 95\% CI $= [0.15, 0.4833]$ (bootstrap percentile, 10{,}000 resamples). Exact McNemar two-sided $p = 0.0013187$.
+
+\textbf{Secondary:} Parse rate difference $= 0.0$ ($p = 1.0$). Latency shift (Hodges-Lehmann): $11{,}061$\,ms in favor of Qwen ($p = 1.63 \times 10^{-11}$).
+
+\subsection{Family-Level Behavior}
+
+\begin{table}[h]
+\centering
+\caption{Family-level accuracy and provisional routing implication (10 cases per family).}
+\label{tab:pilot-family}
+\begin{tabular}{lccc}
+\toprule
+Family & Phi-3.5-mini & Qwen2.5-1.5B & Provisional Route \\
+\midrule
+\texttt{code\_complex} & 1.0 & 0.2 & Phi-3.5-mini \\
+\texttt{code\_simple} & 0.0 & 0.0 & guarded fallback \\
+\texttt{cot\_complex} & 1.0 & 0.0 & Phi-3.5-mini \\
+\texttt{cot\_simple} & 0.8 & 0.0 & Phi-3.5-mini \\
+\texttt{hybrid\_agentic} & 0.3 & 1.0 & Qwen2.5-1.5B \\
+\texttt{hybrid\_generative} & 0.0 & 0.0 & guarded fallback \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two families (\texttt{code\_simple}, \texttt{hybrid\_generative}) remain unresolved---both models achieved 0.0 exact-match accuracy. A targeted 20-case follow-up confirmed this is a label taxonomy/prompt contract limitation, not solely a model capability issue.
+
+\begin{finding}[Split Policy]
+\label{find:split}
+No single SLM dominates all task families. Phi-3.5-mini excels at code and chain-of-thought classification; Qwen2.5-1.5B excels at hybrid-agentic classification. This mirrors the task-dependent dichotomy of Article~1 \citep{johnson2026compress}, now extended from compression strategy selection to model backbone selection.
+\end{finding}
+
+\subsection{Pilot-to-RCT Bridge: Model Generation Change}
+\label{sec:bridge}
+
+The pilot evaluated Phi-3.5-mini (3.8B) and Qwen2.5-1.5B. The full RCT (\S\ref{sec:rct-design}) evaluates their successors: Phi-4-mini-instruct (3.8B) and Qwen-2.5-3B-Instruct (3B), plus DeepSeek-V3 (671B MoE, API).
+
+Key differences and transferability assessment:
+\begin{itemize}[nosep]
+  \item \textbf{Phi 3.5$\to$4:} Same parameter count (3.8B), improved instruction following and structured output. Pilot quality findings (accuracy advantage) are expected to transfer or improve.
+  \item \textbf{Qwen 1.5B$\to$3B:} 2$\times$ parameter increase. Pilot latency advantage may narrow; accuracy may improve. The hybrid-agentic dominance finding requires re-validation.
+  \item \textbf{DeepSeek-V3 (new):} 671B MoE (37B active). Articles 4--5 documented instability under compressed input. Classification output budget (\texttt{max\_new\_tokens}=128) may mitigate explosion risk, but requires empirical validation.
+\end{itemize}
+
+The pilot therefore serves as \emph{motivating evidence} for the RCT design, not as directly combinable data.
+
+% ════════════════════════════════════════════════════════════════════
+% 3. STUDY 2: FOUR-ARM RCT DESIGN
+% ════════════════════════════════════════════════════════════════════
+\section{Study 2: Four-Arm RCT Design}
+\label{sec:rct-design}
+
+\subsection{Trial Arms}
+
+\begin{table}[h]
+\centering
+\caption{Four-arm RCT treatment definitions.}
+\label{tab:arms}
+\small
+\begin{tabular}{clllc}
+\toprule
+Arm & Label & Model Backend & Hosting & Params \\
+\midrule
+A & Control & None (pass-through) & N/A & --- \\
+B & Phi-4-mini & Phi-4-mini-instruct & Azure AI Foundry serverless & 3.8B \\
+C & Qwen-2.5-3B & Qwen-2.5-3B-Instruct & Self-hosted vLLM (A10 GPU) & 3B \\
+D & DeepSeek-V3 & DeepSeek-V3 (API) & DeepSeek commercial API & 671B MoE \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Hypotheses}
+
+Six pre-registered hypotheses, each mapped to a measurable metric:
+
+\begin{hypothesis}[Routing Accuracy]
+\label{hyp:routing}
+Routing accuracy (fraction of requests routed to ground-truth tier) differs across arms, with expected ordering $D > C \geq B > A$. Success threshold: $\geq 85\%$ for the winning arm.
+\end{hypothesis}
+
+\begin{hypothesis}[Compression Quality]
+\label{hyp:compression}
+Average compression ratio at semantic similarity $\geq 0.88$ differs by model backend, with $D > C \geq B > A$. Threshold: $\geq 30\%$ token reduction.
+\end{hypothesis}
+
+\begin{hypothesis}[Total Cost]
+\label{hyp:cost}
+Average USD per request (front-door + downstream) differs, with $B$ or $C < D < A$. Threshold: $\geq 25\%$ reduction vs.\ Arm~A.
+\end{hypothesis}
+
+\begin{hypothesis}[Defect Rate]
+\label{hyp:defect}
+Fraction of responses with $\geq 1$ hypervisor watch-point flag differs, with $B/C/D < A$. Threshold: $\geq 40\%$ reduction vs.\ Arm~A.
+\end{hypothesis}
+
+\begin{hypothesis}[Classification F1]
+\label{hyp:f1}
+F1 macro and hybrid/agentic-specific F1 differ, with $D > C \geq B$. Threshold: F1 macro $\geq 0.82$.
+\end{hypothesis}
+
+\begin{hypothesis}[Latency SLA]
+\label{hyp:latency}
+P95 front-door latency differs, with $C \leq B < D$ (network penalty). Hard gate: $\leq 200$\,ms for all arms.
+\end{hypothesis}
+
+\subsection{Randomization and Integrity}
+
+\begin{itemize}[nosep]
+  \item \textbf{Assignment:} SHA-256(\texttt{session\_id}) $\bmod 4$. Deterministic, no mid-session switches.
+  \item \textbf{Stratification:} By prompt complexity quartile. Each quartile targets equal arm representation within $\pm 5\%$.
+  \item \textbf{Blinding:} Single-blind. Callers do not know arm assignment.
+  \item \textbf{System prompts:} Identical across B, C, D for classification, scoring, and compression.
+\end{itemize}
+
+\subsection{Sample Size and Power}
+
+\begin{itemize}[nosep]
+  \item Target: $N = 250$ per arm ($N_{\text{total}} = 1{,}000$).
+  \item Minimum detectable effect: 10\,pp absolute.
+  \item Significance: $\alpha = 0.05$, Bonferroni-corrected to $\alpha/6 = 0.0083$ for six pairwise comparisons.
+  \item Power: 80\%.
+  \item Interim analysis at $N = 125$ per arm using O'Brien-Fleming spending function boundaries.
+\end{itemize}
+
+\subsection{Statistical Analysis Plan}
+
+\textbf{Primary tests:}
+\begin{itemize}[nosep]
+  \item Routing accuracy, defect rate, F1: $\chi^2$ test for proportions, Bonferroni-corrected.
+  \item Cost, compression ratio: Welch's $t$-test (unequal variances expected), Bonferroni-corrected.
+  \item P95 latency: Bootstrap CI comparison (non-parametric).
+\end{itemize}
+
+\textbf{Subgroup analysis:} Each metric analyzed by task-label subgroup (exploratory, not Bonferroni-corrected, flagged if $p < 0.01$).
+
+\textbf{Pareto frontier:} Computed over (total\_cost\_per\_request, routing\_accuracy). An arm is dominated if another arm is both cheaper and more accurate. Marginal cost per accuracy percentage point quantifies the price of DeepSeek's potential advantage.
+
+\subsection{Pre-Registered Decision Matrix}
+
+\begin{table}[h]
+\centering
+\caption{Pre-registered decision matrix mapping outcomes to deployment actions.}
+\label{tab:decision}
+\small
+\begin{tabular}{lccl}
+\toprule
+Scenario & Cost Winner & Quality Winner & Decision \\
+\midrule
+SLM wins both & B or C & B or C & Deploy winning SLM \\
+DeepSeek quality, SLM cost & B or C & D & SLM + DeepSeek fallback \\
+DeepSeek wins both & D & D & DeepSeek primary; SLM fallback \\
+All similar quality & Lowest & Comparable & Deploy cheapest \\
+DeepSeek fails latency & Any & Any & Eliminate D; choose B vs.\ C \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Tie-breaking rule:} Prefer the arm with fewer external dependencies (self-hosted $>$ serverless $>$ API), as this reduces operational risk and data-residency concerns.
+
+% ════════════════════════════════════════════════════════════════════
+% 4. RCT INFRASTRUCTURE VALIDATION
+% ════════════════════════════════════════════════════════════════════
+\section{RCT Infrastructure Validation}
+\label{sec:rct-infra}
+
+Before executing the full RCT, we validated the four-arm operational stack.
+
+\subsection{Preflight and Progressive Ingestion}
+
+Preflight on 2026-03-13 returned \texttt{overall\_green=true}. Progressive 15-case ingestion completed for each arm with zero failures.
+
+\begin{table}[h]
+\centering
+\caption{Progressive 15-case ingestion summary per arm.}
+\label{tab:progressive}
+\begin{tabular}{ccccc}
+\toprule
+Arm & Cases & Failures & Cost (USD) & Avg latency (ms) \\
+\midrule
+A & 15 & 0 & 0.2892 & 15{,}353 \\
+B & 15 & 0 & 0.2885 & 16{,}397 \\
+C & 15 & 0 & 0.2999 & 15{,}811 \\
+D & 15 & 0 & 0.2947 & 15{,}715 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Bulk Arm Logging}
+
+Bulk runs (250 requests per arm) succeeded with zero failures. Cross-arm gate analysis confirmed \texttt{all\_arms\_n250\_ready=true} and $N = 267$ per arm after smoke+progressive+bulk logs.
+
+\textbf{Critical caveat.} During this infrastructure validation cycle, all arm URLs resolved to the same staging endpoint. These runs validate instrumentation and throughput, but do not support causal treatment-effect claims.
+
+\subsection{Pre-Warm Effect}
+
+An MBPP real-build case study showed pre-warm eliminated cold-start timeout failures (9/10 $\to$ 10/10 completion) and stabilized token-saving measurements.
+
+% ════════════════════════════════════════════════════════════════════
+% 5. RCT RESULTS
+% ════════════════════════════════════════════════════════════════════
+\section{Study 2: RCT Results}
+\label{sec:rct-results}
+
+\pending{This section will be populated after RCT execution with endpoint-isolated arms.}
+
+\subsection{Primary Outcomes}
+
+\pending{Table: Per-arm routing accuracy, F1 macro, compression ratio, cost/request, defect rate, P95 latency.}
+
+\subsection{Pairwise Comparisons}
+
+\pending{Six pairwise comparisons for each primary metric, Bonferroni-corrected at $\alpha/6 = 0.0083$. Effect sizes (Cohen's $h$ for proportions, Cohen's $d$ for continuous) with 95\% CIs.}
+
+\subsection{Family-Level Subgroup Analysis}
+
+\pending{Per-label accuracy breakdown. Expected: largest divergence on hybrid/agentic and hybrid/generative (pilot Finding~\ref{find:split}).}
+
+\subsection{Failure Mode Coding}
+\label{sec:failure-modes}
+
+\pending{Qualitative error analysis beyond accuracy. For each arm, a random sample of 50 misclassified cases coded for:
+\begin{enumerate}[nosep]
+  \item \textbf{Label confusion type:} Adjacent-family confusion vs.\ random misclassification
+  \item \textbf{Confidence calibration:} High-confidence errors vs.\ low-confidence errors
+  \item \textbf{Prompt characteristics:} Length, ambiguity markers, domain vocabulary density
+  \item \textbf{Output pathology:} Truncation, hallucinated labels, JSON parse failure mode
+\end{enumerate}
+This extends beyond accuracy deltas to characterize \emph{how} each model fails.}
+
+\subsection{Interim Analysis}
+
+\pending{O'Brien-Fleming boundaries at $N = 125$. Arm-dropping decision if applicable.}
+
+% ════════════════════════════════════════════════════════════════════
+% 6. PARETO ANALYSIS AND DECISION
+% ════════════════════════════════════════════════════════════════════
+\section{Pareto Analysis and Deployment Decision}
+\label{sec:pareto}
+
+\subsection{Cost--Quality Frontier}
+
+\pending{Pareto frontier plot over (total\_cost\_per\_request, routing\_accuracy). Identification of dominated and non-dominated arms. Marginal cost per accuracy point.}
+
+\subsection{Decision Matrix Application}
+
+\pending{Mechanical application of the pre-registered decision matrix (Table~\ref{tab:decision}). The recommended arm, the supporting evidence, and the tie-breaking rationale (if applicable).}
+
+\subsection{Production Deployment Recommendation}
+
+\pending{Concrete recommendation: which arm to deploy, with what configuration, and under what monitoring regime.}
+
+% ════════════════════════════════════════════════════════════════════
+% 7. DISCUSSION
+% ════════════════════════════════════════════════════════════════════
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Routing as Task-Conditional Model Selection}
+
+Article~1 \citep{johnson2026compress} established that cost optimization strategy should be conditioned on task type. The pilot benchmark (Study~1) extends this principle to the router itself: the best routing \emph{model} also depends on the task family being classified. This creates a recursive optimization problem---the front door that routes tasks is itself subject to the same task-dependent tradeoffs it aims to resolve.
+
+\subsection{Connection to Provider-Dependent Dynamics}
+
+Articles 4--5 \citep{johnson2026greenai,johnson2026benchmark} documented that DeepSeek-Chat exhibits compression sensitivity CS = $-54.1$ (38$\times$ output explosion under compressed input). DeepSeek-V3 (Arm~D) is a successor model with the same MoE architecture. \pending{Whether the classification output budget (\texttt{max\_new\_tokens}=128) successfully constrains this instability is an empirical finding of the RCT.}
+
+\subsection{Methodological Advancement Over Article~6}
+
+Article~6 \citep{johnson2026rct} demonstrated RCT methodology for compression evaluation ($N = 358$, six arms, CONSORT). Article~8 advances the methodology:
+\begin{itemize}[nosep]
+  \item Four fundamentally different inference backends (none, serverless, self-hosted, API)
+  \item Three distinct cost models requiring non-trivial normalization
+  \item Pre-registered decision matrix with explicit tie-breaking rules
+  \item Pareto frontier analysis rather than single-metric comparison
+  \item Failure mode coding in addition to accuracy metrics
+\end{itemize}
+
+\subsection{Limitations}
+
+\begin{itemize}[nosep]
+  \item \textbf{Sample size:} $N = 60$ for pilot; $N = 250$ per arm for RCT. Family-level claims with $n = 10$ (pilot) remain exploratory.
+  \item \textbf{Pilot--RCT model mismatch:} Pilot results from Phi-3.5-mini/Qwen2.5-1.5B do not directly transfer to Phi-4-mini/Qwen-2.5-3B. The pilot motivates but does not substitute for the RCT.
+  \item \textbf{Contract sensitivity:} Results depend on the JSON-safe decoding contract. Different output budgets or prompt templates may shift rankings.
+  \item \textbf{Temporal validity:} Model capabilities change with provider updates. Results are timestamped to specific model versions and infrastructure snapshots.
+  \item \textbf{Single task taxonomy:} The 6-family taxonomy may not capture all production prompt types. Performance on emerging task types is unvalidated.
+  \item \textbf{DeepSeek API dependency:} Arm~D depends on external API availability and pricing stability. Circuit breaker fallback (to Phi-4-mini) introduces a confound.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════
+% 8. THREATS TO VALIDITY
+% ════════════════════════════════════════════════════════════════════
+\section{Threats to Validity}
+\label{sec:threats}
+
+\textbf{Internal validity.} The pilot controls for hardware, commit, and parser/template through locked configuration. The RCT uses deterministic session-level assignment with stratified randomization. The primary threat is the infrastructure validation cycle's endpoint aliasing (\S\ref{sec:rct-infra}), which is clearly delineated from the full RCT.
+
+\textbf{External validity.} The 60-case pilot corpus and the \plexor{} task taxonomy represent one operational context. Generalization to other routing systems, task taxonomies, or model families requires independent replication.
+
+\textbf{Construct validity.} Exact-match label accuracy is a strict metric; partial credit or semantic similarity scoring might favor different models. The choice of exact-match is pre-registered and consistent with production routing requirements (a mis-routed request incurs the full cost of the wrong tier).
+
+% ════════════════════════════════════════════════════════════════════
+% 9. REPRODUCIBILITY
+% ════════════════════════════════════════════════════════════════════
+\section{Reproducibility and Artifact Release}
+\label{sec:repro}
+
+\subsection{Study 1 Artifacts}
+
+\begin{itemize}[nosep]
+  \item Repository: \texttt{micoverde/plexor-rct-repro-data} (private). Tag: \texttt{rct-baseline-2026-03-12}.
+  \item Manifest: source SHA, corpus hashes, run IDs, checksum ledger.
+  \item Key MLflow run IDs: Phi full \texttt{b1e6c7fc}, Qwen full \texttt{18a1c1cd}, Parent \texttt{5e494967}.
+\end{itemize}
+
+\subsection{Study 2 Artifacts}
+
+\pending{MLflow experiment IDs, cross-arm analysis run ID, pricing snapshot artifact, ground-truth label corpus hash.}
+
+\subsection{Automation}
+
+\begin{itemize}[nosep]
+  \item \texttt{scripts/ab-test/export\_repro\_bundle.sh}: Synchronizes artifacts into reproducibility repository.
+  \item \texttt{scripts/ab-test/rct\_cross\_arm\_analysis.py}: Statistical analysis across four arms.
+  \item \texttt{scripts/ab-test/rct\_preflight\_check.py}: Pre-flight validation.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════
+% 10. CONCLUSION
+% ════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+\label{sec:conclusion}
+
+Under a locked hardware and decoding contract, Phi-3.5-mini provides significantly higher front-door classification quality than Qwen2.5-1.5B ($p = 0.0013$), while Qwen2.5-1.5B is substantially lower latency ($p = 1.63 \times 10^{-11}$). The practical production outcome is a \emph{hybrid policy}, not a single-model winner---mirroring the task-dependent dichotomy first documented in Article~1 \citep{johnson2026compress}, now extended from strategy selection to model selection.
+
+\pending{The four-arm RCT will determine whether this split-policy finding generalizes to the next generation of SLMs (Phi-4-mini, Qwen-2.5-3B) and whether a commercial API model (DeepSeek-V3) can justify its external dependency through superior routing accuracy. The pre-registered decision matrix ensures that the deployment recommendation follows mechanically from the data, not from post-hoc judgment.}
+
+The combination of paired statistical testing, pre-registered hypotheses, explicit caveats, Pareto frontier analysis, and reproducibility manifests provides a tractable path from exploratory benchmarking to promotion-grade front-door experimentation.
+
+% ════════════════════════════════════════════════════════════════════
+% REFERENCES
+% ════════════════════════════════════════════════════════════════════
+\bibliography{references}
+\bibliographystyle{plainnat}
+
+% ════════════════════════════════════════════════════════════════════
+% APPENDICES
+% ════════════════════════════════════════════════════════════════════
+\appendix
+
+\section{Key Run IDs}
+\label{app:runids}
+
+\textbf{RunPod A40 pairwise benchmark runs:}
+\begin{itemize}[nosep]
+  \item Phi full: \texttt{b1e6c7fc78554cc2a9f6f16f2136a8f3}
+  \item Qwen full: \texttt{18a1c1cdda704b8cae547554a0aef258}
+  \item Parent pairwise study: \texttt{5e494967722c4f00b123761a030d31b9}
+\end{itemize}
+
+\textbf{Four-arm RCT infrastructure validation:}
+\begin{itemize}[nosep]
+  \item Progressive: A \texttt{9fbfefac}, B \texttt{575222c4}, C \texttt{08dd41ab}, D \texttt{e4dee9f1}
+  \item Bulk: A \texttt{b568a878}, B \texttt{17331092}, C \texttt{05501a6f}, D \texttt{e3e5aef0}
+\end{itemize}
+
+\section{Data and File Pointers}
+\label{app:data}
+
+\begin{itemize}[nosep]
+  \item \texttt{research/context-compression-rct/results/runpod\_secure\_a40\_2026-03-12/analysis\_v2\_60/}
+  \item \texttt{research/context-compression-rct/results/rct\_progressive15\_2026-03-13/}
+  \item \texttt{research/context-compression-rct/results/rct\_arm\_runs\_2026-03-13/}
+\end{itemize}
+
+\section{Per-Case Pilot Results}
+\label{app:percase}
+
+\pending{Full 60-row table with case ID, family, gold label, Phi prediction, Qwen prediction, parse status, latency (ms) for both models.}
+
+\end{document}

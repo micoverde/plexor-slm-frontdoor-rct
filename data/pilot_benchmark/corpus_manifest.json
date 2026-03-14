@@ -1,0 +1,13 @@
+{
+  "path": "scripts/ab-test/eval_profiles/progressive_test_cases_v2_60.jsonl",
+  "sha256": "3be755e8711dd83780c733ea74176f88d45cc5eae4777a0500697a0fa1550bd2",
+  "case_count": 60,
+  "families": [
+    "code_complex",
+    "code_simple",
+    "cot_complex",
+    "cot_simple",
+    "hybrid_agentic",
+    "hybrid_generative"
+  ]
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "family": "code_complex",
+    "phi_accuracy": 1.0,
+    "qwen_accuracy": 0.2,
+    "phi_median_latency_ms": 12490.11,
+    "qwen_median_latency_ms": 1035.44,
+    "discordant_count": 8,
+    "recommended_route": "phi",
+    "confidence_level": "high",
+    "notes": "Phi quality lead with higher latency cost."
+  },
+  {
+    "family": "code_simple",
+    "phi_accuracy": 0.0,
+    "qwen_accuracy": 0.0,
+    "phi_median_latency_ms": 12255.31,
+    "qwen_median_latency_ms": 957.58,
+    "discordant_count": 0,
+    "recommended_route": "guarded_fallback",
+    "confidence_level": "low",
+    "notes": "Both models weak; keep confidence guard / fallback."
+  },
+  {
+    "family": "cot_complex",
+    "phi_accuracy": 1.0,
+    "qwen_accuracy": 0.0,
+    "phi_median_latency_ms": 12171.54,
+    "qwen_median_latency_ms": 1483.6,
+    "discordant_count": 10,
+    "recommended_route": "phi",
+    "confidence_level": "high",
+    "notes": "Phi quality lead with higher latency cost."
+  },
+  {
+    "family": "cot_simple",
+    "phi_accuracy": 0.8,
+    "qwen_accuracy": 0.0,
+    "phi_median_latency_ms": 11438.25,
+    "qwen_median_latency_ms": 1006.8,
+    "discordant_count": 8,
+    "recommended_route": "phi",
+    "confidence_level": "high",
+    "notes": "Phi quality lead with higher latency cost."
+  },
+  {
+    "family": "hybrid_agentic",
+    "phi_accuracy": 0.3,
+    "qwen_accuracy": 1.0,
+    "phi_median_latency_ms": 12355.54,
+    "qwen_median_latency_ms": 907.12,
+    "discordant_count": 7,
+    "recommended_route": "qwen",
+    "confidence_level": "high",
+    "notes": "Qwen dominant on autonomy-marked prompts."
+  },
+  {
+    "family": "hybrid_generative",
+    "phi_accuracy": 0.0,
+    "qwen_accuracy": 0.0,
+    "phi_median_latency_ms": 11922.45,
+    "qwen_median_latency_ms": 2541.92,
+    "discordant_count": 0,
+    "recommended_route": "guarded_fallback",
+    "confidence_level": "low",
+    "notes": "Both models weak; keep confidence guard / fallback."
+  }
+]
