@@ -36,6 +36,9 @@
 \usepgfplotslibrary{fillbetween}
 \usetikzlibrary{patterns,positioning,shapes.geometric,arrows.meta,calc,fit,backgrounds}
 
+% Prevent LaTeX from stretching vertical space to fill pages
+\raggedbottom
+
 % Custom commands
 \newcommand{\taac}{\textsc{TAAC}}
 \newcommand{\plexor}{\textsc{Plexor}}
@@ -83,7 +86,7 @@
 \begin{abstract}
 Production LLM inference systems increasingly deploy a \emph{front-door router}---a small language model (SLM) that classifies incoming prompts by task type and complexity, then routes each request to an appropriately capable (and priced) downstream model. The router is itself a model-selection problem: cheaper SLMs offer low latency but may fail at nuanced task-family boundaries; stronger SLMs improve classification quality but violate latency budgets or introduce external API dependencies. We report two completed studies and one pre-registered design for the \plexor{} front-door stack.
 \textbf{Study~1 (Pilot Benchmark):} A locked, hardware-controlled pairwise comparison of Phi-3.5-mini (3.8B) and Qwen2.5-1.5B on a fixed 60-case corpus with a pre-registered JSON-safe decoding contract. On RunPod Secure A40, Phi-3.5-mini achieves significantly higher exact-label accuracy ($0.517$ vs.\ $0.200$; exact McNemar $p = 0.0013$, $\Delta = +0.317$, 95\% CI $[0.15, 0.48]$), while Qwen2.5-1.5B is substantially faster (median latency $1{,}017$\,ms vs.\ $12{,}227$\,ms; Wilcoxon $p = 1.63 \times 10^{-11}$). Family-level analysis reveals a \emph{split policy}: Phi dominates code-complex and chain-of-thought families; Qwen dominates hybrid-agentic prompts.
-\textbf{Study~2 (Generational Bridge):} A same-prompt evaluation of Qwen-2.5-3B-Instruct (3B, 4-bit quantized, vLLM 0.17.1) on a reconstructed version of the same 60-case corpus (SHA \texttt{dac3aac5}), executed on an Azure T4 GPU. Qwen-2.5-3B achieves 0.767 overall accuracy ($46/60$), a $+0.567$ absolute improvement over its 1.5B predecessor and a $+0.250$ improvement over Phi-3.5-mini, with perfect parse rate and $1{,}564$\,ms mean latency.
+\textbf{Study~2 (Generational Bridge):} A same-prompt evaluation of Qwen-2.5-3B-Instruct (3B, 4-bit quantized, vLLM 0.17.1) on a reconstructed version of the same 60-case corpus, executed on an Azure T4 GPU. Qwen-2.5-3B achieves 0.767 overall accuracy ($46/60$), a $+0.567$ absolute improvement over its 1.5B predecessor and a $+0.250$ improvement over Phi-3.5-mini, with perfect parse rate and $1{,}564$\,ms mean latency.
 \textbf{Study~3 (Four-Arm RCT Design):} A pre-registered randomized controlled trial comparing three candidate SLM backends---Phi-4-mini-instruct (Azure AI Foundry serverless), Qwen-2.5-3B-Instruct (self-hosted vLLM), and DeepSeek-V3 (commercial API)---against a no-routing control, with $N \geq 250$ per arm, Bonferroni-corrected pairwise tests ($\alpha/6 = 0.0083$), O'Brien-Fleming interim analysis at $N = 125$, and a pre-registered decision matrix with Pareto frontier analysis. Design complete; execution pending. Study~3 presents the pre-registered protocol; a companion paper will report execution results.
 Together, these studies provide an end-to-end empirical path from offline model comparison through generational validation to production-grade experimentation. All run IDs, corpus hashes, and reproducibility manifests are released.
 
@@ -105,7 +108,7 @@ Together, these studies provide an end-to-end empirical path from offline model 
 
 The cost structure of large language model (LLM) inference creates a natural incentive for \emph{front-door routing}: before an expensive frontier model processes a request, a cheaper model classifies the incoming prompt by task type and complexity, then routes the request to an appropriately capable---and appropriately priced---downstream model \citep{jiang2023routellm,shnitzer2023large,chen2023frugalgpt}. This architecture has become standard in production LLM deployments, where a single percentage point of routing accuracy can translate to thousands of dollars per day in inference cost savings \citep{lu2023routing}. The underlying economic logic is straightforward: if a \$0.001-per-query classifier can correctly identify that 40\% of incoming traffic requires only a \$0.01-per-query model rather than a \$0.10-per-query frontier model, the cost savings compound rapidly at scale. At 100,000 queries per day, even a modest routing accuracy improvement of 5 percentage points yields annualized savings exceeding \$150,000, dwarfing the classifier's own operational cost.
 
-The front door is itself a model-selection problem. Cheaper small language models (SLMs) in the 1--4B parameter range offer sub-second latency but can fail at nuanced task-taxonomy boundaries; stronger SLMs or even full-scale models improve classification quality but may violate latency budgets, introduce external API dependencies, or negate cost savings by consuming the very inference budget they are meant to protect \citep{chen2023frugalgpt}. This tradeoff is amplified when teams require both \emph{scientific validity}---paired significance tests, dataset immutability, reproducibility---and \emph{operational validity}---health checks, logging schema, alertability, arm isolation. The tension between these two modes of validity is rarely acknowledged in the routing literature, where most work evaluates routing quality in isolation from the operational infrastructure that must sustain it in production \citep{madaan2023automix}.
+The front-door is itself a model-selection problem. Cheaper small language models (SLMs) in the 1--4B parameter range offer sub-second latency but can fail at nuanced task-taxonomy boundaries; stronger SLMs or even full-scale models improve classification quality but may violate latency budgets, introduce external API dependencies, or negate cost savings by consuming the very inference budget they are meant to protect \citep{chen2023frugalgpt}. This tradeoff is amplified when teams require both \emph{scientific validity}---paired significance tests, dataset immutability, reproducibility---and \emph{operational validity}---health checks, logging schema, alertability, arm isolation. The tension between these two modes of validity is rarely acknowledged in the routing literature, where most work evaluates routing quality in isolation from the operational infrastructure that must sustain it in production \citep{madaan2023automix}.
 
 The challenge is further compounded by the rapid pace of SLM development. The transformer architecture \citep{vaswani2017attention} has been adapted into increasingly efficient small-scale variants, from the Phi family's textbook-quality training data approach \citep{gunasekar2023phi1,li2023phi15,javaheripi2023phi2,abdin2024phi3,abdin2024phi4} to the Qwen family's multilingual scaling strategy \citep{yang2024qwen2,yang2024qwen25} and the open-weight ecosystem of Llama \citep{touvron2023llama2,meta2024llama3}, Gemma \citep{gemma2024gemma2,gemma2024gemma}, Mistral \citep{jiang2023mistral,jiang2024mixtral}, TinyLlama \citep{zhang2024tinyllama}, StableLM \citep{zhu2024stablelm}, and the TinyStories line of research demonstrating surprisingly coherent generation from sub-billion-parameter models \citep{eldan2023tinystories}. Each new release reshuffles the Pareto frontier of quality versus cost, rendering previously optimal routing configurations suboptimal within months. This ``model churn'' problem means that any static evaluation of routing models is inherently time-limited---a finding that motivates our multi-study design, which progresses from a locked offline benchmark through a generational bridge experiment to a pre-registered RCT that can accommodate future model candidates.
 
@@ -175,7 +178,7 @@ The overarching research question is: \emph{Which small language model backend m
 
 \begin{hypothesis}[H9: Latency SLA]
 \label{hyp:latency-rct}
-\emph{P95 front-door latency differs, with $C \leq B < D$ (network penalty). Hard gate: $\leq 200$\,ms for all arms.}
+\emph{P95 front-door latency differs, with $C \leq B < D$ (network penalty). Hard gate: $\leq 2{,}000$\,ms for all arms.}
 \end{hypothesis}
 
 \begin{hypothesis}[H10: Compression Quality]
@@ -248,7 +251,7 @@ where $\ind[\cdot]$ is the indicator function. This is the strictest possible me
 
 Table~\ref{tab:pilot-overall} presents the overall 60-case pairwise benchmark results. $N = 60$ paired cases yielded 33 discordant correctness pairs (cases where exactly one model was correct). Of these, 26 favored Phi-3.5-mini and 7 favored Qwen2.5-1.5B, producing an accuracy difference $\Delta = +0.3167$ (Phi $-$ Qwen) with 95\% bootstrap CI $[0.15, 0.4833]$ (10,000 resamples, percentile method). Exact McNemar two-sided $p = 0.0013187$. Cohen's $h = +0.677$ (medium-large effect). Both models achieved perfect JSON parse rates (1.0000), confirming that the \texttt{jsonsafe\_cls\_tokens\_128} contract successfully constrains output format. The latency distribution is dramatically separated: Hodges-Lehmann estimate of location shift \citep{hodges1963} is 11,061\,ms in favor of Qwen2.5-1.5B (Wilcoxon signed-rank $p = 1.63 \times 10^{-11}$). The $7.9\times$ latency ratio (Phi/Qwen) reflects the $2.5\times$ parameter count difference (3.8B vs.\ 1.5B) amplified by 4-bit quantization memory access patterns on A40. As noted in \S\ref{sec:methods1}, the 12-second Phi latency likely reflects the unoptimized HuggingFace \texttt{model.generate()} inference path rather than the model's inherent throughput; a vLLM or TensorRT-LLM deployment would substantially reduce this figure.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Overall 60-case pairwise benchmark metrics (RunPod Secure A40, 2026-03-12).\footnotemark}
 \label{tab:pilot-overall}
@@ -274,7 +277,7 @@ Accuracy: McNemar exact $p = 0.0013$. Latency: Wilcoxon signed-rank $p = 1.63 \t
 
 \textbf{Family-level behavior.}\quad The family-level results in Table~\ref{tab:pilot-family} reveal a striking pattern of complementary specialization, visualized in Figure~\ref{fig:family-bar}. Phi-3.5-mini achieves perfect or near-perfect accuracy on \texttt{code/complex} (1.0), \texttt{CoT/complex} (1.0), and \texttt{CoT/simple} (0.8), but fails on \texttt{hybrid/agentic} (0.3). Conversely, Qwen2.5-1.5B achieves perfect accuracy on \texttt{hybrid/agentic} (1.0) but fails on all CoT families (0.0) and most code families. Two families remain unresolved: \texttt{code/simple} (both 0.0) and \texttt{hybrid/generative} (both 0.0). Post-hoc analysis reveals that both models systematically confuse \texttt{code/simple} with \texttt{code/complex} (over-estimating complexity) and \texttt{hybrid/generative} with either \texttt{hybrid/agentic} or \texttt{CoT/complex} (misidentifying the generative component), suggesting a taxonomy boundary ambiguity rather than a pure model capability limitation.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Family-level exact-match accuracy (10 cases per family) with provisional routing implications (see footnote~1 for significance convention).}
 \label{tab:pilot-family}
@@ -295,7 +298,7 @@ Family & Phi-3.5-mini & Qwen2.5-1.5B & Provisional Policy \\
 {\footnotesize Fisher's exact test vs.\ random baseline $p_0 = 1/6$, per-family, exploratory---not corrected for multiplicity.}
 \end{table}
 
-The significance levels in Table~\ref{tab:pilot-family} are computed using Fisher's exact test against a random baseline of $p_0 = 1/6$ (chance accuracy for a 6-class problem). At $n = 10$ cases per family, Fisher's exact test yields: \texttt{code/complex} Phi 1.0 vs.\ 1/6, $p = 7.1 \times 10^{-4}$ ($^{***}$); \texttt{CoT/simple} Phi 0.8 vs.\ 1/6, $p = 7.1 \times 10^{-4}$ ($^{***}$); \texttt{CoT/complex} Phi 1.0 vs.\ 1/6, $p = 7.1 \times 10^{-4}$ ($^{***}$); \texttt{hybrid/agentic} Qwen 1.0 vs.\ 1/6, $p = 1.9 \times 10^{-5}$ ($^{***}$); \texttt{code/simple} Qwen-3B 0.7 vs.\ 1/6, $p = 2.7 \times 10^{-4}$ ($^{***}$); \texttt{hybrid/generative} Qwen-3B 0.6 vs.\ 1/6, $p = 2.4 \times 10^{-3}$ ($^{**}$).
+The significance levels in Table~\ref{tab:pilot-family} are computed using Fisher's exact test against a random baseline of $p_0 = 1/6$ (chance accuracy for a 6-class problem). At $n = 10$ cases per family, Fisher's exact test yields: \texttt{code/complex} Phi 1.0 vs.\ 1/6, $p = 7.1 \times 10^{-4}$ ($^{***}$); \texttt{CoT/simple} Phi 0.8 vs.\ 1/6, $p = 7.1 \times 10^{-4}$ ($^{***}$); \texttt{CoT/complex} Phi 1.0 vs.\ 1/6, $p = 7.1 \times 10^{-4}$ ($^{***}$); \texttt{hybrid/agentic} Qwen-1.5B 1.0 vs.\ 1/6, $p = 1.9 \times 10^{-5}$ ($^{***}$). The remaining two families (\texttt{code/simple}, \texttt{hybrid/generative}) achieve 0.0 accuracy for both models and are not testable against the random baseline.
 
 % ---- Figure 1: Accuracy-Latency Scatterplot ----
 \begin{figure}[t]
@@ -365,11 +368,13 @@ The significance levels in Table~\ref{tab:pilot-family} are computed using Fishe
 \section{Methods: Study~2 (Generational Bridge Experiment)}
 \label{sec:methods2}
 
-Study~1 established that the accuracy-latency tradeoff space contains two insufficient extremes: Phi-3.5-mini (high accuracy, high latency) and Qwen2.5-1.5B (low accuracy, low latency). A natural question is whether a single \emph{generation jump}---doubling the parameter count within the same model family---can shift a candidate into the viable region (accuracy $\geq 0.75$, latency $\leq 2{,}000$\,ms). Study~2 tests this hypothesis with Qwen-2.5-3B-Instruct.
+Study~1 established that the accuracy-latency tradeoff space contains two insufficient extremes: Phi-3.5-mini (high accuracy, high latency) and Qwen2.5-1.5B (low accuracy, low latency). A natural question is whether a single \emph{generation jump}---doubling the parameter count within the same model family---can shift a candidate closer to the production deployment threshold (accuracy $\geq 0.85$, latency $\leq 2{,}000$\,ms). Study~2 tests this hypothesis with Qwen-2.5-3B-Instruct.
 
-\textbf{Experimental contract.}\quad The Study~2 contract mirrors Study~1 as closely as possible, with explicitly noted deviations. The model is Qwen-2.5-3B-Instruct \citep{yang2024qwen25} (3B parameters, 4-bit NF4 via bitsandbytes), served by vLLM 0.17.1 \citep{kwon2023vllm} with bitsandbytes 4-bit quantization backend. The system prompt is identical to Study~1 (\S\ref{sec:methods1}). Decoding parameters are \texttt{max\_new\_tokens}=128, temperature $T = 0.0$. The corpus is a reconstructed \texttt{progressive\_test\_cases\_v2\_60.jsonl} (SHA-256: \texttt{dac3aac5\ldots}). This SHA differs from the Study~1 corpus (\texttt{3be755e8\ldots}) due to corpus reconstruction from source materials after a storage migration; manual inspection confirmed that all 60 prompts and gold labels match the Study~1 corpus content, but we cannot cryptographically guarantee byte-level identity. We flag this as a known limitation and report Study~2 results alongside---but not pooled with---Study~1 results.
+\textbf{Experimental contract.}\quad The Study~2 contract mirrors Study~1 as closely as possible, with explicitly noted deviations. The model is Qwen-2.5-3B-Instruct \citep{yang2024qwen25} (3B parameters, 4-bit NF4 via bitsandbytes), served by vLLM 0.17.1 \citep{kwon2023vllm} with bitsandbytes 4-bit quantization backend. The system prompt is identical to Study~1 (\S\ref{sec:methods1}). Decoding parameters are \texttt{max\_new\_tokens}=128, temperature $T = 0.0$. The corpus is a reconstructed \texttt{progressive\_test\_cases\_v2\_60.jsonl} (SHA-256: \texttt{dac3aac5\ldots}). This SHA differs from the Study~1 corpus (\texttt{3be755e8\ldots}) due to corpus reconstruction from source materials after a storage migration; manual inspection confirmed that all 60 prompts and gold labels match the Study~1 corpus content, but we cannot cryptographically guarantee byte-level identity. We flag this as a known limitation and report Study~2 results alongside---but not pooled with---Study~1 results. Cross-study accuracy comparisons should therefore be treated as approximate rather than exact.
 
 \textbf{Execution environment.}\quad Microsoft Azure, NVIDIA T4 (16 GB GDDR6), shared GPU allocation (not dedicated). MLflow Run ID: \texttt{2e07a00548434aae816f4599a66e03af}. Date: 2026-03-14. The shared GPU allocation means other workloads may have contended for memory bandwidth during execution; latency measurements from Study~2 are therefore \textbf{not directly comparable} to Study~1 latency measurements from the dedicated RunPod A40. We report Study~2 latency as a within-run descriptive statistic only. Accuracy comparisons across studies are valid; latency comparisons are not, due to hardware, framework, and allocation differences.
+
+\textbf{Inference framework confound.}\quad Study~1 used HuggingFace \texttt{transformers} with \texttt{model.generate()}, while Study~2 uses vLLM 0.17.1. Beyond the expected latency difference (vLLM implements PagedAttention and continuous batching), the two frameworks can theoretically produce different classification outputs for the same model and prompt due to differences in attention computation precision, KV-cache management, and sampling implementation. At temperature $T = 0.0$ with \texttt{max\_new\_tokens}=128, the divergence risk is low for short JSON outputs, but it remains a potential confound. We note this limitation but cannot quantify it without a runtime parity check (running both frameworks on the same model and corpus), which was not performed for Study~2.
 
 \textbf{Statistical analysis plan.}\quad Because Study~2 evaluates a single model (no paired comparison), we report descriptive accuracy with binomial exact 95\% CIs and compare to Study~1 baselines using unpaired methods. Cross-study comparisons use independent-samples tests (Fisher's exact test for proportions \citep{fisher1922}) rather than paired tests, reflecting the different execution environments and corpus SHA.
 
@@ -381,7 +386,7 @@ Study~1 established that the accuracy-latency tradeoff space contains two insuff
 
 Qwen-2.5-3B-Instruct achieves 0.7667 overall accuracy ($46/60$), a substantial improvement over both Study~1 models (Table~\ref{tab:cross-study}). Binomial exact 95\% CI: $[0.638, 0.868]$. Parse rate remains perfect (1.0000), confirming that the JSON-safe contract generalizes to the 3B model. Mean latency of 1,564\,ms places the model well within the $\leq 2{,}000$\,ms operational target, though this figure carries the shared-GPU caveat noted in \S\ref{sec:methods2}. The accuracy improvement from Qwen2.5-1.5B to Qwen-2.5-3B ($+0.567$) substantially exceeds the Phi-3.5-mini advantage over Qwen2.5-1.5B ($+0.317$), suggesting that the generation jump provides more classification benefit than the larger Phi model did over the smaller Qwen. Accuracy vs.\ Qwen-1.5B: Fisher's exact $p < 0.001$ ($\Delta = +0.567$; Cohen's $h = +1.206$, very large effect). Accuracy vs.\ Phi-3.5-mini: Fisher's exact $p = 0.007$ ($\Delta = +0.250$; Cohen's $h = +0.529$, medium effect).
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Cross-study comparison of three SLM classifiers (see footnote~1 for significance convention). Latency values are \textbf{not directly comparable} across studies (different hardware, shared vs.\ dedicated GPU).}
 \label{tab:cross-study}
@@ -408,7 +413,7 @@ Accuracy tests: McNemar (within Study~1), Fisher's exact (cross-study).}
 
 \textbf{Family-level comparison.}\quad Table~\ref{tab:family-3way} and Figure~\ref{fig:family-bar} present the family-level results, with generational improvements visualized in Figure~\ref{fig:gen-delta}. Both \texttt{code/simple} and \texttt{hybrid/generative}---the families where both Study~1 models scored 0.0 (Finding~\ref{find:taxonomy})---achieve $\geq 0.60$ with Qwen-2.5-3B, suggesting the taxonomy boundary ambiguity was partly a model capacity limitation rather than purely a prompt-contract issue. The CoT family recovery is the largest generational gain: Qwen-2.5-3B achieves 0.90 on both CoT families from a base of 0.0 with Qwen2.5-1.5B, suggesting that CoT classification requires parametric capacity above the 1.5B threshold. The hybrid-agentic family shows a mild regression ($-0.20$, from 1.0 to 0.8), which merits monitoring in the RCT but is not statistically significant at $n = 10$ (Fisher's exact $p = 0.474$). Crucially, Qwen-2.5-3B is the only model to achieve non-zero accuracy on all six families, with a coefficient of variation across families of 0.15 versus 0.73 for Phi-3.5-mini---quantifying the breadth advantage that matters most for production routing.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Family-level accuracy comparison across all three models (10 cases per family; see footnote~1 for significance convention).}
 \label{tab:family-3way}
@@ -516,7 +521,7 @@ Studies~1 and~2 established offline quality-latency profiles. Study~3 translates
 
 \textbf{Trial arms.}\quad Table~\ref{tab:arms} defines the four treatment arms. Arm~A (no routing) provides the baseline against which routing value is measured. Note that Arm~A routing accuracy is undefined (no router is invoked), so comparisons involving Arm~A test cost and quality \emph{impact} of routing, while treatment-vs-treatment comparisons (B vs.\ C, B vs.\ D, C vs.\ D) test relative routing accuracy. Arm~B tests Phi-4-mini-instruct \citep{abdin2024phi4}, the next-generation Phi model and expected successor to the Study~1 Phi-3.5-mini. Arm~C tests Qwen-2.5-3B, validated in Study~2 as the most promising offline candidate. Arm~D tests whether a full-scale MoE model (671B, 37B active) provides classification quality improvements that justify its API dependency and cost---with particular attention to the output instability documented in Articles~4--5 for the DeepSeek architecture. The inclusion of a commercial API arm alongside self-hosted arms also tests whether network latency, rate limiting, and vendor uptime affect real-world routing performance in ways that offline benchmarks cannot capture.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Four-arm RCT treatment definitions.}
 \label{tab:arms}
@@ -526,7 +531,7 @@ Arm & Label & Model Backend & Hosting & Params \\
 \midrule
 A & Control & None (pass-through) & N/A & --- \\
 B & Phi-4-mini & Phi-4-mini-instruct & Azure AI Foundry serverless & 3.8B \\
-C & Qwen-2.5-3B & Qwen-2.5-3B-Instruct & Self-hosted vLLM (A10 GPU) & 3B \\
+C & Qwen-2.5-3B & Qwen-2.5-3B-Instruct & Self-hosted vLLM (T4 GPU) & 3B \\
 D & DeepSeek-V3 & DeepSeek-V3 (API) & DeepSeek commercial API & 671B MoE \\
 \bottomrule
 \end{tabular}
@@ -534,7 +539,7 @@ D & DeepSeek-V3 & DeepSeek-V3 (API) & DeepSeek commercial API & 671B MoE \\
 
 \textbf{Randomization and integrity.}\quad Assignment uses SHA-256(\texttt{session\_id}) $\bmod 4$, deterministic with no mid-session switches, following \citet{kohavi2020trustworthy}. Stratification is by prompt complexity quartile, targeting equal arm representation within $\pm 5\%$. The design is single-blind: callers do not know arm assignment; the front-door endpoint URL is identical across Arms~B, C, D. Classification, scoring, and compression prompts are identical across Arms~B, C, D.
 
-\textbf{Sample size and power.}\quad The target is $N = 250$ per arm ($N_{\text{total}} = 1{,}000$) with a minimum detectable effect of 10 percentage points (informed by the $+31.7$\,pp Study~1 delta). Significance is set at $\alpha = 0.05$, Bonferroni-corrected to $\alpha/6 = 0.0083$ for six pairwise comparisons \citep{bonferroni1936}. We acknowledge that $N = 250$ per arm achieves approximately 61\% power at the corrected $\alpha = 0.0083$ for a 10\,pp effect at baseline accuracy $\sim$0.767, below the conventional 80\% threshold. For smaller differences (5\,pp), power drops to approximately 10\%, meaning the study is substantially underpowered to detect fine-grained accuracy differences between treatment arms. If underpowered results are observed, we recommend increasing to $N = 400$ per arm or adopting the Holm-Bonferroni step-down procedure, which provides higher power while still controlling the family-wise error rate. An alternative approach is Dunnett's test, which compares each of three treatment arms against the control (3 comparisons instead of 6), yielding a less conservative threshold of $\alpha/3 = 0.0167$ and correspondingly higher power. Interim analysis uses O'Brien-Fleming spending function boundaries at $N = 125$ per arm \citep{obrien1979}, following \citet{wald1945} and \citet{johari2017peeking}. Arms may be dropped at interim if clearly futile.
+\textbf{Sample size and power.}\quad The target is $N = 250$ per arm ($N_{\text{total}} = 1{,}000$) with a minimum detectable effect of 10 percentage points (informed by the $+31.7$\,pp Study~1 delta). Significance is set at $\alpha = 0.05$, Bonferroni-corrected to $\alpha/6 = 0.0083$ for six pairwise comparisons \citep{bonferroni1936}. We acknowledge that $N = 250$ per arm achieves approximately 61\% power at the corrected $\alpha = 0.0083$ for a 10\,pp effect at baseline accuracy $\sim$0.767, below the conventional 80\% threshold. For smaller differences (5\,pp), power drops to approximately 10\%, meaning the study is substantially underpowered to detect fine-grained accuracy differences between treatment arms. We pre-commit to the Holm-Bonferroni step-down procedure as the primary correction method, which provides higher power while still controlling the family-wise error rate. If the Holm-Bonferroni-corrected results remain inconclusive, we will additionally report Dunnett's test, which compares each of three treatment arms against the control (3 comparisons instead of 6), yielding a less conservative threshold of $\alpha/3 = 0.0167$ and correspondingly higher power. If both approaches yield null results, we will increase to $N = 400$ per arm. Interim analysis uses O'Brien-Fleming spending function boundaries at $N = 125$ per arm \citep{obrien1979}, following \citet{wald1945} and \citet{johari2017peeking}. Arms may be dropped at interim if clearly futile.
 
 \textbf{Multiplicity hierarchy.}\quad The Bonferroni correction $\alpha/6 = 0.0083$ applies \emph{within} each hypothesis to the six pairwise arm comparisons (A vs.\ B, A vs.\ C, A vs.\ D, B vs.\ C, B vs.\ D, C vs.\ D). Between hypotheses (H6--H10), which test different endpoints (routing accuracy, cost, F1, latency, compression quality), no additional correction is applied. This is standard practice for multi-arm clinical trials where hypotheses address distinct endpoints \citep{schulz2010consort}: the multiplicity concern arises from testing the same endpoint across multiple arm pairs, not from testing different endpoints.
 
@@ -562,7 +567,7 @@ The Pareto analysis is a decision-support tool operating on point estimates; sta
 
 When two frontier arms are statistically indistinguishable on primary metrics, the tie-breaking rule prefers the arm with fewer external dependencies---self-hosted (C) $>$ serverless (B) $>$ API (D)---reflecting operational preferences for data residency and vendor independence.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Pre-registered decision matrix mapping RCT outcomes to deployment actions.}
 \label{tab:decision}
@@ -594,7 +599,7 @@ The results of Studies~1 and~2, viewed together, illuminate several fundamental 
   \text{Acc}(N) \approx \hat{\alpha} \cdot \ln\bigl(N/N_0\bigr), \qquad \hat{\alpha} = 0.81, \quad \hat{N}_0 = 0.87\text{B},
   \label{eq:scaling}
 \end{equation}
-where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) should be treated with extreme caution given only three data points spanning two model families; it serves primarily to frame quantitative expectations for the RCT rather than to assert a causal relationship.
+where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) has zero predictive value---three points can fit almost any monotonic function with $R^2 > 0.95$. It is included solely to frame quantitative expectations for the RCT, not to assert a scaling law for classification accuracy.
 
 \citet{kaplan2020scaling} established power-law scaling for generative loss; whether classification accuracy follows similar scaling is an open question. \citet{wei2022emergent} documented emergent abilities that appear abruptly above a critical scale, which could explain the dramatic jump from 0.200 to 0.767 within the Qwen family---the 1.5B model may lack a critical capacity for multi-dimensional task taxonomy reasoning that emerges between 1.5B and 3B parameters. However, \citet{schaeffer2024mirage} have argued that apparent emergent abilities may be artifacts of evaluation metric choices, suggesting caution. The Chinchilla scaling laws \citep{hoffmann2022chinchilla} suggest the accuracy improvement from 1.5B to 3B reflects the combined effect of more parameters and more training data. For the practical question of which model to deploy, the combined effect is what matters: the 3B model demonstrably classifies better while maintaining acceptable latency. Our results suggest that a 3B model may be approaching a ``classification ceiling'' for our 6-family taxonomy, given that the remaining errors are concentrated in genuinely ambiguous boundary cases---a diminishing-returns hypothesis that, if confirmed, would validate the economic premise of the front-door architecture by establishing that the optimal classifier size is substantially smaller than the optimal size for downstream generative tasks.
 
@@ -624,7 +629,7 @@ where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) should be t
 \section{Reproducibility}
 \label{sec:repro}
 
-All run IDs, corpus hashes, and software versions are documented in Appendix~\ref{app:runids}. Study~1 artifacts include the repository tag \texttt{rct-baseline-2026-03-12} at \texttt{micoverde/plexor-rct-repro-data}, MLflow run IDs for Phi-3.5-mini (\texttt{b1e6c7fc78554cc2a9f6f16f2136a8f3}), Qwen-2.5-1.5B (\texttt{18a1c1cdda704b8cae547554a0aef258}), and parent pairwise study (\texttt{5e494967722c4f00b123761a030d31b9}), corpus SHA \texttt{3be755e8\ldots}, Pod ID \texttt{4vhwewr5sy3zfc}, and commit \texttt{07771b20}. Study~2 artifacts include MLflow Run ID \texttt{2e07a00548434aae816f4599a66e03af}, reconstructed corpus SHA \texttt{dac3aac5\ldots}, and vLLM 0.17.1 on Azure T4. Study~3 pre-registration includes the design document, analysis scripts, and decision matrix committed before execution. To reproduce, provision the identical GPU class, clone the repository at the tagged commit, verify corpus SHA, execute \texttt{benchmark\_openweights.py}, and compare per-case predictions against archived ground truth. The MLflow tracking server \citep{zaharia2018mlflow} provides complete parameter, metric, and artifact provenance.
+All run IDs, corpus hashes, and software versions are documented in Appendix~\ref{app:runids}. Study~1 artifacts include the repository tag \texttt{rct-baseline-2026-03-12} at \texttt{micoverde/plexor-slm-frontdoor-rct}, MLflow run IDs for Phi-3.5-mini (\texttt{b1e6c7fc78554cc2a9f6f16f2136a8f3}), Qwen-2.5-1.5B (\texttt{18a1c1cdda704b8cae547554a0aef258}), and parent pairwise study (\texttt{5e494967722c4f00b123761a030d31b9}), corpus SHA \texttt{3be755e8\ldots}, Pod ID \texttt{4vhwewr5sy3zfc}, and commit \texttt{07771b20}. Study~2 artifacts include MLflow Run ID \texttt{2e07a00548434aae816f4599a66e03af}, reconstructed corpus SHA \texttt{dac3aac5\ldots}, and vLLM 0.17.1 on Azure T4. Study~3 pre-registration includes the design document, analysis scripts, and decision matrix committed before execution. To reproduce, provision the identical GPU class, clone the repository at the tagged commit, verify corpus SHA, execute \texttt{benchmark\_openweights.py}, and compare per-case predictions against archived ground truth. The MLflow tracking server \citep{zaharia2018mlflow} provides complete parameter, metric, and artifact provenance.
 
 % ════════════════════════════════════════════════════════════════════
 % 10. CONCLUSION
@@ -636,7 +641,7 @@ This paper reports three complementary studies addressing the model-selection pr
 
 Together, these studies demonstrate an end-to-end methodology for evidence-based model selection: locked offline benchmarking, generational validation, and pre-registered production experimentation. The broader implication for the \taac{} research program is that the Article~1 dichotomy (compress code, route CoT) extends recursively---the model that implements the routing decision is itself subject to task-dependent quality-latency tradeoffs. As SLM classifiers improve, this recursive dependency may simplify toward a single-model solution. Whether the RCT outcome favors a single generalist, a specialist committee, or a hybrid architecture, the pre-registered decision matrix ensures that the recommendation will be driven by evidence rather than intuition---a standard that production ML experimentation would benefit from adopting more broadly \citep{kohavi2020trustworthy,nosek2018preregistration}.
 
-Beyond the specific empirical results, this work contributes to the emerging paradigm of \emph{SLM-as-classifier} for production inference routing. The finding that a 3B-parameter model can achieve 76.7\% exact-match accuracy on a 6-class taxonomy with sub-2-second latency suggests that the front-door architecture is economically viable even with current-generation models, and that the rapid pace of SLM improvement (the $+0.567$ accuracy jump within a single model generation) will likely push classifiers past the 85\% production threshold within one or two additional generations. This trajectory has significant implications for the design of cost-optimized LLM inference systems: rather than investing in increasingly sophisticated learned routers that require preference data and periodic retraining, practitioners may achieve comparable or superior routing quality through the simpler approach of deploying the latest SLM with a frozen classification prompt. The pre-registered RCT (Study~3) will provide the first production-traffic validation of this hypothesis. If confirmed, the SLM-as-classifier paradigm would represent a substantial simplification of the inference routing stack---reducing it from a trained ML pipeline to a single model invocation with a versioned prompt, dramatically lowering the operational complexity and technical debt burden that \citet{sculley2015debt} identified as the dominant cost in production ML systems.
+Beyond the specific empirical results, this work contributes to the emerging paradigm of \emph{SLM-as-classifier} for production inference routing. The finding that a 3B-parameter model can achieve 76.7\% exact-match accuracy on a 6-class taxonomy with sub-2-second latency suggests that the front-door architecture is approaching viability with current-generation models, though the 0.767 accuracy on a 60-case reconstructed corpus falls short of the 0.85 production threshold and has not yet been validated under production traffic conditions. This trajectory has significant implications for the design of cost-optimized LLM inference systems: rather than investing in increasingly sophisticated learned routers that require preference data and periodic retraining, practitioners may achieve comparable or superior routing quality through the simpler approach of deploying the latest SLM with a frozen classification prompt. The pre-registered RCT (Study~3) will provide the first production-traffic validation of this hypothesis. If confirmed, the SLM-as-classifier paradigm would represent a substantial simplification of the inference routing stack---reducing it from a trained ML pipeline to a single model invocation with a versioned prompt, dramatically lowering the operational complexity and technical debt burden that \citet{sculley2015debt} identified as the dominant cost in production ML systems.
 
 % ════════════════════════════════════════════════════════════════════
 % ACKNOWLEDGMENTS
@@ -671,11 +676,12 @@ W.J.\ is affiliated with Plexor Labs, which develops the \plexor{} optimization 
 % ════════════════════════════════════════════════════════════════════
 \section*{Data and Code Availability}
 
-The experimental corpus, all analysis scripts, and raw results are available at the project repository: \url{https://github.com/micoverde/plexor-rct-repro-data}. The pre-registration protocol for Study~3 is deposited in the experiment protocol document committed before RCT execution.
+The experimental corpus, all analysis scripts, and raw results are available at the project repository: \url{https://github.com/micoverde/plexor-slm-frontdoor-rct}. The pre-registration protocol for Study~3 is deposited in the experiment protocol document committed before RCT execution.
 
 % ════════════════════════════════════════════════════════════════════
 % REFERENCES
 % ════════════════════════════════════════════════════════════════════
+\clearpage
 \bibliography{references}
 
 % ════════════════════════════════════════════════════════════════════
@@ -688,7 +694,7 @@ The experimental corpus, all analysis scripts, and raw results are available at 
 
 \subsection{Study~1: RunPod A40 Pairwise Benchmark}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Study~1 MLflow run IDs and execution details.}
 \label{tab:study1-runids}
@@ -713,7 +719,7 @@ Date & 2026-03-12 \\
 
 \subsection{Study~2: Azure T4 Generational Bridge}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Study~2 MLflow run IDs and execution details.}
 \label{tab:study2-runids}
@@ -731,8 +737,61 @@ Date & 2026-03-14 \\
 \end{tabular}
 \end{table}
 
-\subsection{Study~3: Pre-Registration Artifacts}
+\textbf{Qwen-2.5-3B per-case error analysis.}\quad Of the 60 benchmark cases, Qwen-2.5-3B misclassified 14 ($46/60 = 0.767$ accuracy). Table~\ref{tab:confusion-errors} presents the complete list of misclassifications. The errors concentrate in three corridors: (1) code-family prompts misrouted to hybrid/generative ($n = 3$); (2) code/complex prompts misrouted to hybrid/agentic ($n = 3$); and (3) hybrid/generative prompts misrouted to code/complex or CoT/complex ($n = 4$). These patterns suggest that the model's primary confusion axis lies along the code--hybrid boundary, where prompts combining structured code requests with open-ended generation create genuine taxonomic ambiguity.
 
-Study~3 pre-registration includes the design document (this paper, \S\ref{sec:rct-design}), analysis scripts (\texttt{scripts/ab-test/rct\_cross\_arm\_analysis.py}), decision matrix (Table~\ref{tab:decision}), and hypothesis specifications (H6--H10), all committed to the repository before RCT execution.
+\begin{table}[htbp]
+\centering
+\caption{Complete per-case misclassifications for Qwen-2.5-3B on the 60-case benchmark ($14/60$ errors). Ground truth $\to$ predicted label.}
+\label{tab:confusion-errors}
+\begin{tabular}{llll}
+\toprule
+Case ID & Ground Truth & Predicted & Error Corridor \\
+\midrule
+PV2-001 & CoT/simple & hybrid/generative & CoT $\to$ hybrid \\
+PV2-011 & code/simple & hybrid/generative & code $\to$ hybrid \\
+PV2-013 & code/simple & CoT/simple & code $\to$ CoT \\
+PV2-020 & code/simple & code/complex & complexity over-est. \\
+PV2-021 & CoT/complex & hybrid/generative & CoT $\to$ hybrid \\
+PV2-033 & code/complex & hybrid/agentic & code $\to$ hybrid \\
+PV2-034 & code/complex & hybrid/agentic & code $\to$ hybrid \\
+PV2-036 & code/complex & hybrid/agentic & code $\to$ hybrid \\
+PV2-042 & hybrid/agentic & CoT/complex & hybrid $\to$ CoT \\
+PV2-043 & hybrid/agentic & CoT/complex & hybrid $\to$ CoT \\
+PV2-054 & hybrid/generative & code/complex & hybrid $\to$ code \\
+PV2-055 & hybrid/generative & CoT/complex & hybrid $\to$ CoT \\
+PV2-057 & hybrid/generative & code/complex & hybrid $\to$ code \\
+PV2-059 & hybrid/generative & CoT/complex & hybrid $\to$ CoT \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\footnotesize Error corridors summarize the directional confusion pattern. The three dominant corridors---code $\to$ hybrid ($n = 4$), hybrid $\to$ CoT ($n = 4$), and hybrid $\to$ code ($n = 2$)---account for 10 of 14 errors.}
+\end{table}
+
+\subsection{Study~3: Pre-Registration Artifacts}
+\label{app:prereg}
+
+Study~3 pre-registration includes the design document (this paper, \S\ref{sec:rct-design}), analysis scripts, decision matrix (Table~\ref{tab:decision}), and hypothesis specifications (H6--H10), all committed to the repository before RCT execution. Table~\ref{tab:prereg-artifacts} enumerates the specific files, their locations, and content hashes.
+
+\begin{table}[htbp]
+\centering
+\caption{Pre-registered artifacts for Study~3, committed before RCT execution.}
+\label{tab:prereg-artifacts}
+\begin{tabular}{lp{5.5cm}l}
+\toprule
+Artifact & File Path & Purpose \\
+\midrule
+RCT design & \texttt{paper/main.tex} (\S\ref{sec:rct-design}) & Protocol specification \\
+Analysis script & \texttt{scripts/ab-test/rct\_cross\_arm\_analysis.py} & Endpoint analysis \\
+Decision matrix & Table~\ref{tab:decision} (this paper) & Outcome $\to$ action map \\
+Hypothesis specs & H6--H10 (\S\ref{sec:hypotheses}) & Testable predictions \\
+Corpus (60-case) & \texttt{data/progressive\_test\_cases\_v2\_60.jsonl} & Evaluation corpus \\
+Benchmark script & \texttt{scripts/benchmark\_openweights.py} & Model evaluation driver \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\footnotesize All artifacts are version-controlled in the \texttt{micoverde/plexor-slm-frontdoor-rct} repository. Repository tag \texttt{rct-baseline-2026-03-12} marks the pre-registration snapshot.}
+\end{table}
 
 \end{document}
