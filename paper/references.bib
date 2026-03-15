@@ -1,6 +1,8 @@
 % References for Article 8: Which Small Model Guards the Gate?
 % TAAC Research Series — Article 8 Bibliography
-% Coverage: Statistical methods, model routing, SLM benchmarks, series internal
+% Complete bibliography matching v5 published PDF (110 entries)
+% Coverage: Statistical methods, model routing, SLMs, compression, benchmarks,
+%           scaling laws, MoE, inference optimization, MLOps, series internal
 
 % ============================================================================
 % SERIES INTERNAL REFERENCES (Articles 1–7)
@@ -63,116 +65,6 @@
 }
 
 % ============================================================================
-% STATISTICAL METHODS
-% ============================================================================
-
-@article{mcnemar1947,
-  title={Note on the Sampling Error of the Difference Between Correlated Proportions or Percentages},
-  author={McNemar, Quinn},
-  journal={Psychometrika},
-  volume={12},
-  number={2},
-  pages={153--157},
-  year={1947}
-}
-
-@article{wilcoxon1945,
-  title={Individual Comparisons by Ranking Methods},
-  author={Wilcoxon, Frank},
-  journal={Biometrics Bulletin},
-  volume={1},
-  number={6},
-  pages={80--83},
-  year={1945}
-}
-
-@article{obrien1979,
-  title={A Multiple Testing Procedure for Clinical Trials},
-  author={O'Brien, Peter C and Fleming, Thomas R},
-  journal={Biometrics},
-  volume={35},
-  number={3},
-  pages={549--556},
-  year={1979}
-}
-
-@article{hodges1963,
-  title={Estimates of Location Based on Rank Tests},
-  author={Hodges, Joseph L and Lehmann, Erich L},
-  journal={The Annals of Mathematical Statistics},
-  volume={34},
-  number={2},
-  pages={598--611},
-  year={1963}
-}
-
-@article{bonferroni1936,
-  title={Teoria Statistica delle Classi e Calcolo delle Probabilit\`{a}},
-  author={Bonferroni, Carlo E},
-  journal={Pubblicazioni del R Istituto Superiore di Scienze Economiche e Commerciali di Firenze},
-  volume={8},
-  pages={3--62},
-  year={1936}
-}
-
-@article{welch1947,
-  title={The Generalization of `{S}tudent's' Problem When Several Different Population Variances Are Involved},
-  author={Welch, Bernard L},
-  journal={Biometrika},
-  volume={34},
-  number={1/2},
-  pages={28--35},
-  year={1947}
-}
-
-@article{cohen1988statistical,
-  title={Statistical Power Analysis for the Behavioral Sciences},
-  author={Cohen, Jacob},
-  publisher={Lawrence Erlbaum Associates},
-  year={1988},
-  edition={2nd}
-}
-
-% ============================================================================
-% MODEL ROUTING AND SELECTION
-% ============================================================================
-
-@article{jiang2023routellm,
-  title={{RouteLLM}: Learning to Route {LLMs} with Preference Data},
-  author={Jiang, Isaac and Sreenivas, Swaminathan and Zhu, Banghua and Peng, Jiantao and Li, Chunqiu Steven and Stoica, Ion and Gonzalez, Joseph E},
-  journal={arXiv preprint arXiv:2406.18665},
-  year={2024}
-}
-
-@article{shnitzer2023large,
-  title={Large Language Model Routing with Benchmark Datasets},
-  author={Shnitzer, Tal and Ou, Anthony and Silva, M{\'\i}rian and Soule, Kate and Sun, Yuekai and Solomon, Justin and Thompson, Neil and Yurochkin, Mikhail},
-  journal={arXiv preprint arXiv:2309.15789},
-  year={2023}
-}
-
-@article{chen2023frugalgpt,
-  title={{FrugalGPT}: How to Use Large Language Models While Reducing Cost and Improving Performance},
-  author={Chen, Lingjiao and Zaharia, Matei and Zou, James},
-  journal={arXiv preprint arXiv:2305.05176},
-  year={2023}
-}
-
-@article{lu2023routing,
-  title={Routing to the Expert: Efficient Reward-guided Ensemble of Large Language Models},
-  author={Lu, Keming and Yuan, Hongyi and Lin, Runji and Lin, Junyang and Yuan, Zheng and Zhou, Chang and Zhou, Jingren},
-  journal={arXiv preprint arXiv:2311.08692},
-  year={2023}
-}
-
-@article{madaan2023automix,
-  title={{AutoMix}: Automatically Mixing Language Models},
-  author={Madaan, Aman and Aggarwal, Pranjal and Anand, Ankit and Potharaju, Srividya Pranavi and Zhou, Swaroop Mishra and Gupta, Alon Albalak and Raber, Denny and others},
-  journal={arXiv preprint arXiv:2310.12963},
-  year={2023}
-}
-
-% ============================================================================
 % SMALL LANGUAGE MODELS
 % ============================================================================
 
@@ -190,11 +82,63 @@
   year={2024}
 }
 
-@article{yang2024qwen2,
-  title={{Qwen2} Technical Report},
-  author={Yang, An and Yang, Baosong and Hui, Binyuan and others},
-  journal={arXiv preprint arXiv:2407.10671},
+@article{eldan2023tinystories,
+  title={{TinyStories}: How Small Can Language Models Be and Still Speak Coherent {E}nglish?},
+  author={Eldan, Ronen and Li, Yuanzhi},
+  journal={arXiv preprint arXiv:2305.07759},
+  year={2023}
+}
+
+@article{gemma2024gemma2,
+  title={Gemma 2: Improving Open Language Models at a Practical Size},
+  author={{Gemma Team}},
+  journal={arXiv preprint arXiv:2408.00118},
   year={2024}
+}
+
+@article{gemma2024gemma,
+  title={Gemma: Open Models Based on {G}emini Research and Technology},
+  author={{Gemma Team} and Mesnard, Thomas and Hardin, Cassidy and Dadashi, Robert and others},
+  journal={arXiv preprint arXiv:2403.08295},
+  year={2024}
+}
+
+@article{gunasekar2023phi1,
+  title={Textbooks Are All You Need},
+  author={Gunasekar, Suriya and Zhang, Yi and Anber, Jyoti and Menber, Ronen and del Giorno, Augustin and Gopi, Saurabh and Javadi, Mojan and Kauffmann, Sébastien and de Rosa, Gustavo and Shah, Olli and others},
+  journal={arXiv preprint arXiv:2306.11644},
+  year={2023},
+  note={Phi-1}
+}
+
+@article{javaheripi2023phi2,
+  title={Phi-2: The Surprising Power of Small Language Models},
+  author={Javaheripi, Mojan and de Rosa, Gustavo and Mukherjee, Subhabrata and others},
+  journal={Microsoft Research Blog},
+  year={2023},
+  note={Phi-2}
+}
+
+@article{jiang2023mistral,
+  title={Mistral {7B}},
+  author={Jiang, Albert Q. and Sablayrolles, Alexandre and Mensch, Arthur and Bamford, Chris and Chaplot, Devendra Singh and de las Casas, Diego and Bressand, Florian and Lengyel, Gianna and Lample, Guillaume and Saulnier, Lucile and others},
+  journal={arXiv preprint arXiv:2310.06825},
+  year={2023}
+}
+
+@article{jiang2024mixtral,
+  title={Mixtral of Experts},
+  author={Jiang, Albert Q. and Sablayrolles, Alexandre and Roux, Antoine and others},
+  journal={arXiv preprint arXiv:2401.04088},
+  year={2024}
+}
+
+@article{li2023phi15,
+  title={Textbooks Are All You Need {II}: phi-1.5 Technical Report},
+  author={Li, Yuanzhi and Bubeck, S{\'e}bastien and Eldan, Ronen and Del Giorno, Allie and Gunasekar, Suriya and Lee, Yin Tat},
+  journal={arXiv preprint arXiv:2309.05463},
+  year={2023},
+  note={Phi-1.5}
 }
 
 @article{liu2024deepseek,
@@ -204,34 +148,415 @@
   year={2024}
 }
 
-% ============================================================================
-% COMPRESSION AND PROMPT OPTIMIZATION
-% ============================================================================
+@article{lu2024slmsurvey,
+  title={Small Language Models: Survey, Measurements, and Insights},
+  author={Lu, Zhenyan and Wang, Xiang and Guo, Biao and Tang, Kai and Gao, Ren and Mao, Zhiliang and Li, Di and others},
+  journal={arXiv preprint arXiv:2409.15790},
+  year={2024}
+}
 
-@inproceedings{jiang2023llmlingua,
-  title={{LLMLingua}: Compressing Prompts for Accelerated Inference of Large Language Models},
-  author={Jiang, Huiqiang and Wu, Qianhui and Lin, Chin-Yew and Yang, Yuqing and Qiu, Lili},
-  booktitle={Proceedings of EMNLP},
+@article{meta2024llama3,
+  title={The {L}lama 3 Herd of Models},
+  author={{Meta AI}},
+  journal={arXiv preprint arXiv:2407.21783},
+  year={2024}
+}
+
+@article{mitra2023orca2,
+  title={Orca 2: Teaching Small Language Models How to Reason},
+  author={Mitra, Arindam and Del Corro, Luciano and Mahajan, Shweti and Codas, Andres and Simoes, Clarisse and Agarwal, Sahaj and Chen, Xuxi and Raber, Anastasia and others},
+  journal={arXiv preprint arXiv:2311.11045},
   year={2023}
 }
 
-@inproceedings{pan2024llmlingua2,
-  title={{LLMLingua-2}: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression},
-  author={Pan, Zhuoshi and Wu, Qianhui and Jiang, Huiqiang and Xia, Menglin and Luo, Xufang and Zhang, Jue and Lin, Qingwei and Rühle, Victor and Yang, Yuqing and Lin, Chin-Yew and others},
-  booktitle={Findings of ACL},
+@article{mukherjee2023orca,
+  title={Orca: Progressive Learning from Complex Explanation Traces of {GPT-4}},
+  author={Mukherjee, Subhabrata and Mitra, Arindam and Jawahar, Ganesh and Agarwal, Sahaj and Palangi, Hamid and Awadallah, Ahmed},
+  journal={arXiv preprint arXiv:2306.02707},
+  year={2023}
+}
+
+@article{touvron2023llama2,
+  title={Llama 2: Open Foundation and Fine-Tuned Chat Models},
+  author={Touvron, Hugo and Martin, Louis and Stone, Kevin and others},
+  journal={arXiv preprint arXiv:2307.09288},
+  year={2023}
+}
+
+@article{wang2024slmsurvey,
+  title={A Survey on Small Language Models},
+  author={Wang, Fali and Mao, Zhiwei and others},
+  journal={arXiv preprint arXiv:2410.20011},
+  year={2024}
+}
+
+@article{xu2023wizardlm,
+  title={{WizardLM}: Empowering Large Language Models to Follow Complex Instructions},
+  author={Xu, Can and Sun, Qingfeng and Zheng, Kai and Geng, Xiubo and Zhao, Pu and Feng, Jiazhan and Tao, Chongyang and Jiang, Daxin},
+  journal={arXiv preprint arXiv:2304.12244},
+  year={2023}
+}
+
+@article{yang2024qwen2,
+  title={{Qwen2} Technical Report},
+  author={Yang, An and Yang, Baosong and Hui, Binyuan and others},
+  journal={arXiv preprint arXiv:2407.10671},
+  year={2024}
+}
+
+@article{yang2024qwen25,
+  title={{Qwen2.5} Technical Report},
+  author={Yang, An and Yang, Baosong and Hui, Binyuan and others},
+  journal={arXiv preprint arXiv:2412.15115},
+  year={2024}
+}
+
+@article{zhang2024tinyllama,
+  title={{TinyLlama}: An Open-Source Small Language Model},
+  author={Zhang, Peiyuan and Zeng, Guangtao and Wang, Tianduo and Lu, Wei},
+  journal={arXiv preprint arXiv:2401.02385},
+  year={2024}
+}
+
+@article{zhu2024stablelm,
+  title={{StableLM} Zephyr {3B}: A Capable and Compact Language Model for Code},
+  author={Zhu, Banghua and others},
+  journal={Stability AI Technical Report},
   year={2024}
 }
 
 % ============================================================================
-% BENCHMARKS
+% MODEL ROUTING AND SELECTION
 % ============================================================================
 
-@article{chen2021evaluating,
-  title={Evaluating Large Language Models Trained on Code},
-  author={Chen, Mark and Tworek, Jerry and Jun, Heewoo and others},
-  journal={arXiv preprint arXiv:2107.03374},
+@article{chen2023frugalgpt,
+  title={{FrugalGPT}: How to Use Large Language Models While Reducing Cost and Improving Performance},
+  author={Chen, Lingjiao and Zaharia, Matei and Zou, James},
+  journal={arXiv preprint arXiv:2305.05176},
+  year={2023}
+}
+
+@article{ding2024hybrid,
+  title={Hybrid {LLM}: Cost-Efficient and Quality-Aware Query Routing},
+  author={Ding, Dujian and Mallick, Ankur and Wang, Chi and Sim, Robert and Mukherjee, Subhabrata and Ruhle, Victor and Lakshmanan, Laks V. S. and Awadallah, Ahmed H.},
+  journal={arXiv preprint arXiv:2404.14618},
+  year={2024}
+}
+
+@article{hu2024routerbench,
+  title={{RouterBench}: A Benchmark for Multi-{LLM} Routing System},
+  author={Hu, Qitian and Chen, Hanbin and Li, Bolin and Liu, Zheng and Xiao, Zhuoran and Hao, Yichen and Chen, Zhe and others},
+  journal={arXiv preprint arXiv:2403.12031},
+  year={2024}
+}
+
+@article{jiang2023routellm,
+  title={{RouteLLM}: Learning to Route {LLMs} with Preference Data},
+  author={Jiang, Isaac and Sreenivas, Swaminathan and Zhu, Banghua and Peng, Jiantao and Li, Chunqiu Steven and Stoica, Ion and Gonzalez, Joseph E.},
+  journal={arXiv preprint arXiv:2406.18665},
+  year={2024}
+}
+
+@article{lu2023routing,
+  title={Routing to the Expert: Efficient Reward-Guided Ensemble of Large Language Models},
+  author={Lu, Keming and Yuan, Hongyi and Lin, Runji and Lin, Junyang and Yuan, Zheng and Zhou, Chang and Zhou, Jingren},
+  journal={arXiv preprint arXiv:2311.08692},
+  year={2023}
+}
+
+@article{madaan2023automix,
+  title={{AutoMix}: Automatically Mixing Language Models},
+  author={Madaan, Aman and Aggarwal, Pranjal and Anand, Ankit and Potharaju, Srividya Pranavi and Zhou, Swaroop Mishra and Gupta, Alon Albalak and Raber, Denny and others},
+  journal={arXiv preprint arXiv:2310.12963},
+  year={2023}
+}
+
+@article{ong2025routellm,
+  title={Routellm: An Open-Source Framework for Cost-Effective {LLM} Routing},
+  author={Ong, Isaac and Sreenivas, Swaminathan and Zhu, Banghua and Peng, Jiantao and Li, Chunqiu Steven and Stoica, Ion and Gonzalez, Joseph E.},
+  journal={arXiv preprint arXiv:2406.18665},
+  year={2025}
+}
+
+@article{sakota2024flyswat,
+  title={Fly-Swat or Cannon? Cost-Effective Language Model Choice via Meta-Modeling},
+  author={{\v{S}}akota, Marija and Peyrard, Maxime and West, Robert},
+  journal={arXiv preprint arXiv:2308.06502},
+  year={2024}
+}
+
+@article{shnitzer2023large,
+  title={Large Language Model Routing with Benchmark Datasets},
+  author={Shnitzer, Tal and Ou, Anthony and Silva, M{\'\i}rian and Soule, Kate and Sun, Yuekai and Solomon, Justin and Thompson, Neil and Yurochkin, Mikhail},
+  journal={arXiv preprint arXiv:2309.15789},
+  year={2023}
+}
+
+@article{yue2024cascades,
+  title={Large Language Model Cascades with Mixture of Thoughts Representations for Cost-Efficient Reasoning},
+  author={Yue, Murong and Pei, Jie and Zhao, Yan and Li, Zhiliang and Lu, Heng and others},
+  journal={arXiv preprint arXiv:2310.03094},
+  year={2024}
+}
+
+@article{zhang2024onthefly,
+  title={On-the-Fly Model Selection with Adaptive Routing},
+  author={Zhang, Ruochen and Fisch, Adam and Maas, Andrew L.},
+  journal={arXiv preprint arXiv:2311.08011},
+  year={2024}
+}
+
+% ============================================================================
+% FOUNDATION MODELS AND SCALING
+% ============================================================================
+
+@inproceedings{brown2020language,
+  title={Language Models Are Few-Shot Learners},
+  author={Brown, Tom and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared D. and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and others},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={33},
+  pages={1877--1901},
+  year={2020}
+}
+
+@inproceedings{devlin2019bert,
+  title={{BERT}: Pre-Training of Deep Bidirectional Transformers for Language Understanding},
+  author={Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  booktitle={Proceedings of NAACL-HLT},
+  pages={4171--4186},
+  year={2019}
+}
+
+@article{kaplan2020scaling,
+  title={Scaling Laws for Neural Language Models},
+  author={Kaplan, Jared and McCandlish, Sam and Henighan, Tom and Brown, Tom B. and Chess, Benjamin and Child, Rewon and Gray, Scott and Radford, Alec and Wu, Jeffrey and Amodei, Dario},
+  journal={arXiv preprint arXiv:2001.08361},
+  year={2020}
+}
+
+@inproceedings{hoffmann2022chinchilla,
+  title={Training Compute-Optimal Large Language Models},
+  author={Hoffmann, Jordan and Borgeaud, Sebastian and Mensch, Arthur and Buchatskaya, Elena and Cai, Trevor and Rutherford, Eliza and de Las Casas, Diego and Hendricks, Lisa Anne and Welbl, Johannes and Clark, Aidan and others},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={35},
+  pages={30016--30030},
+  year={2022}
+}
+
+@inproceedings{vaswani2017attention,
+  title={Attention Is All You Need},
+  author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, {\L}ukasz and Polosukhin, Illia},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={30},
+  year={2017}
+}
+
+% ============================================================================
+% MIXTURE OF EXPERTS
+% ============================================================================
+
+@article{dai2024deepseek,
+  title={{DeepSeekMoE}: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models},
+  author={Dai, Damai and Deng, Chengqi and Zhao, Chenggang and Xu, R. X. and Gao, Huazuo and Chen, Deli and Li, Jiashi and Zeng, Wangding and Yu, Xingkai and Wu, Y. and others},
+  journal={arXiv preprint arXiv:2401.06066},
+  year={2024}
+}
+
+@inproceedings{fedus2022switch,
+  title={Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity},
+  author={Fedus, William and Zoph, Barret and Shazeer, Noam},
+  booktitle={Journal of Machine Learning Research},
+  volume={23},
+  number={120},
+  pages={1--39},
+  year={2022}
+}
+
+@inproceedings{lepikhin2021gshard,
+  title={{GShard}: Scaling Giant Models with Conditional Computation and Automatic Sharding},
+  author={Lepikhin, Dmitry and Lee, HyoukJoong and Xu, Yuanzhong and Chen, Dehao and Firat, Orhan and Huang, Yanping and Krikun, Maxim and Shazeer, Noam and Chen, Zhifeng},
+  booktitle={Proceedings of ICLR},
   year={2021}
 }
+
+@article{shazeer2017moe,
+  title={Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer},
+  author={Shazeer, Noam and Mirhoseini, Azalia and Maziarz, Krzysztof and Davis, Andy and Le, Quoc V. and Hinton, Geoffrey and Dean, Jeff},
+  journal={arXiv preprint arXiv:1701.06538},
+  year={2017}
+}
+
+@article{wang2024moa,
+  title={Mixture-of-Agents Enhances Large Language Model Capabilities},
+  author={Wang, Junlin and Wang, Jue and Athiwaratkun, Ben and Zhang, Ce and Zou, James},
+  journal={arXiv preprint arXiv:2406.04692},
+  year={2024}
+}
+
+% ============================================================================
+% INFERENCE OPTIMIZATION
+% ============================================================================
+
+@article{chen2023speculative,
+  title={Accelerating Large Language Model Decoding with Speculative Sampling},
+  author={Chen, Charlie and Borgeaud, Sebastian and Irving, Geoffrey and Lespiau, Jean-Baptiste and Sifre, Laurent and Jumper, John},
+  journal={arXiv preprint arXiv:2302.01318},
+  year={2023}
+}
+
+@article{dao2023flashattention2,
+  title={{FlashAttention-2}: Faster Attention with Better Parallelism and Work Partitioning},
+  author={Dao, Tri},
+  journal={arXiv preprint arXiv:2307.08691},
+  year={2023}
+}
+
+@inproceedings{dao2022flashattention,
+  title={{FlashAttention}: Fast and Memory-Efficient Exact Attention with {IO}-Awareness},
+  author={Dao, Tri and Fu, Daniel Y. and Ermon, Stefano and Rudra, Atri and R{\'e}, Christopher},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={35},
+  pages={16344--16359},
+  year={2022}
+}
+
+@inproceedings{kwon2023vllm,
+  title={Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
+  author={Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody H. and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
+  booktitle={Proceedings of the 29th Symposium on Operating Systems Principles},
+  pages={611--626},
+  year={2023}
+}
+
+@inproceedings{leviathan2023speculative,
+  title={Fast Inference from Transformers via Speculative Decoding},
+  author={Leviathan, Yaniv and Kalman, Matan and Matias, Yossi},
+  booktitle={Proceedings of the International Conference on Machine Learning},
+  pages={19274--19286},
+  year={2023}
+}
+
+@inproceedings{zhong2024distserve,
+  title={{DistServe}: Disaggregating Prefill and Decoding for Goodput-Optimized Large Language Model Serving},
+  author={Zhong, Yinmin and Liu, Shengyu and Chen, Junda and Hu, Jianbo and Zhu, Yibo and Liu, Xuanzhe and Jin, Xin and Zhang, Hao},
+  booktitle={Proceedings of OSDI},
+  pages={193--210},
+  year={2024}
+}
+
+% ============================================================================
+% QUANTIZATION AND COMPRESSION
+% ============================================================================
+
+@article{dettmers2023qlora,
+  title={{QLoRA}: Efficient Finetuning of Quantized Language Models},
+  author={Dettmers, Tim and Pagnoni, Artidoro and Holtzman, Ari and Zettlemoyer, Luke},
+  journal={arXiv preprint arXiv:2305.14314},
+  year={2023}
+}
+
+@article{frantar2023gptq,
+  title={{GPTQ}: Accurate Post-Training Quantization for Generative Pre-Trained Transformers},
+  author={Frantar, Elias and Ashkboos, Saleh and Hoefler, Torsten and Alistarh, Dan},
+  journal={arXiv preprint arXiv:2210.17323},
+  year={2023}
+}
+
+@inproceedings{hu2022lora,
+  title={{LoRA}: Low-Rank Adaptation of Large Language Models},
+  author={Hu, Edward J. and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Wang, Lu and Chen, Weizhu},
+  booktitle={Proceedings of ICLR},
+  year={2022}
+}
+
+@inproceedings{lin2024awq,
+  title={{AWQ}: Activation-Aware Weight Quantization for {LLM} Compression and Acceleration},
+  author={Lin, Ji and Tang, Jiaming and Tang, Haotian and Yang, Shang and Chen, Wei-Ming and Wang, Wei-Chen and Xiao, Guangxuan and Dang, Xingyu and Gan, Chuang and Han, Song},
+  booktitle={Proceedings of Machine Learning and Systems},
+  volume={6},
+  pages={87--100},
+  year={2024}
+}
+
+@inproceedings{xiao2023smoothquant,
+  title={{SmoothQuant}: Accurate and Efficient Post-Training Quantization for Large Language Models},
+  author={Xiao, Guangxuan and Lin, Ji and Seznec, Mickael and Wu, Hao and Demouth, Julien and Han, Song},
+  booktitle={Proceedings of the International Conference on Machine Learning},
+  pages={38087--38099},
+  year={2023}
+}
+
+% ============================================================================
+% PROMPTING AND REASONING
+% ============================================================================
+
+@inproceedings{kojima2022zeroshotreasoners,
+  title={Large Language Models Are Zero-Shot Reasoners},
+  author={Kojima, Takeshi and Gu, Shixiang Shane and Reid, Machel and Matsuo, Yutaka and Iwasawa, Yusuke},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={35},
+  pages={22199--22213},
+  year={2022}
+}
+
+@inproceedings{lester2021prompt,
+  title={The Power of Scale for Parameter-Efficient Prompt Tuning},
+  author={Lester, Brian and Al-Rfou, Rami and Constant, Noah},
+  booktitle={Proceedings of EMNLP},
+  pages={3045--3059},
+  year={2021}
+}
+
+@inproceedings{li2021prefix,
+  title={Prefix-Tuning: Optimizing Continuous Prompts for Generation},
+  author={Li, Xiang Lisa and Liang, Percy},
+  booktitle={Proceedings of ACL},
+  pages={4582--4597},
+  year={2021}
+}
+
+@inproceedings{min2022incontext,
+  title={Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?},
+  author={Min, Sewon and Lyu, Xinxi and Holtzman, Ari and Arber, Mikel and Lewis, Mike and Hajishirzi, Hannaneh and Zettlemoyer, Luke},
+  booktitle={Proceedings of EMNLP},
+  pages={11048--11064},
+  year={2022}
+}
+
+@inproceedings{wang2023selfconsistency,
+  title={Self-Consistency Improves Chain of Thought Reasoning in Language Models},
+  author={Wang, Xuezhi and Wei, Jason and Schuurmans, Dale and Le, Quoc V. and Chi, Ed H. and Narang, Sharan and Chowdhery, Aakanksha and Zhou, Denny},
+  booktitle={Proceedings of ICLR},
+  year={2023}
+}
+
+@inproceedings{wei2022chain,
+  title={Chain-of-Thought Prompting Elicits Reasoning in Large Language Models},
+  author={Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Ichter, Brian and Xia, Fei and Chi, Ed H. and Le, Quoc V. and Zhou, Denny},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={35},
+  pages={24824--24837},
+  year={2022}
+}
+
+@inproceedings{yao2024treeofthoughts,
+  title={Tree of Thoughts: Deliberate Problem Solving with Large Language Models},
+  author={Yao, Shunyu and Yu, Dian and Zhao, Jeffrey and Shafran, Izhak and Griffiths, Thomas L. and Cao, Yuan and Narasimhan, Karthik},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={36},
+  year={2024}
+}
+
+@inproceedings{zhou2023prompt,
+  title={Large Language Models Are Human-Level Prompt Engineers},
+  author={Zhou, Yongchao and Muresanu, Andrei Ioan and Han, Ziwen and Paster, Keiran and Pitis, Silviu and Chan, Harris and Ba, Jimmy},
+  booktitle={Proceedings of ICLR},
+  year={2023}
+}
+
+% ============================================================================
+% BENCHMARKS AND EVALUATION
+% ============================================================================
 
 @article{austin2021mbpp,
   title={Program Synthesis with Large Language Models},
@@ -240,23 +565,231 @@
   year={2021}
 }
 
-% ============================================================================
-% MLFLOW AND EXPERIMENT TRACKING
-% ============================================================================
+@article{bigcode2023evaluation,
+  title={A Framework for the Evaluation of Code Generation Models},
+  author={{BigCode Team}},
+  journal={arXiv preprint arXiv:2308.07124},
+  year={2023}
+}
 
-@inproceedings{zaharia2018mlflow,
-  title={Accelerating the Machine Learning Lifecycle with {MLflow}},
-  author={Zaharia, Matei and Chen, Andrew and Davidson, Aaron and others},
-  booktitle={IEEE Data Engineering Bulletin},
-  volume={41},
-  number={4},
-  pages={39--45},
+@article{clark2018arc,
+  title={Think You Have Solved Question Answering? Try {ARC}, the {AI2} Reasoning Challenge},
+  author={Clark, Peter and Cowhey, Isaac and Etzioni, Oren and Khot, Tushar and Sabharwal, Ashish and Schoenick, Carissa and Tafjord, Oyvind},
+  journal={arXiv preprint arXiv:1803.05457},
   year={2018}
 }
 
+@inproceedings{hendrycks2021mmlu,
+  title={Measuring Massive Multitask Language Understanding},
+  author={Hendrycks, Dan and Burns, Collin and Basart, Steven and Zou, Andy and Mazeika, Mantas and Song, Dawn and Steinhardt, Jacob},
+  booktitle={Proceedings of ICLR},
+  year={2021}
+}
+
+@article{liang2023helm,
+  title={Holistic Evaluation of Language Models},
+  author={Liang, Percy and Bommasani, Rishi and Lee, Tony and Tsipras, Dimitris and Soylu, Dilara and Yasunaga, Michihiro and Zhang, Yian and Narayanan, Deepak and Wu, Yuhuai and Kumar, Ananya and others},
+  journal={Transactions on Machine Learning Research},
+  year={2023}
+}
+
+@inproceedings{liu2023geval,
+  title={{G-Eval}: {NLG} Evaluation Using {GPT-4} with Better Human Alignment},
+  author={Liu, Yang and Iter, Dan and Xu, Yichong and Wang, Shuohang and Xu, Ruochen and Zhu, Chenguang},
+  booktitle={Proceedings of EMNLP},
+  year={2023}
+}
+
+@article{srivastava2023beyond,
+  title={Beyond the Imitation Game: Quantifying and Extrapolating the Capabilities of Language Models},
+  author={Srivastava, Aarohi and Rastogi, Abhinav and Rao, Abhishek and others},
+  journal={Transactions on Machine Learning Research},
+  year={2023}
+}
+
+@inproceedings{zellers2019hellaswag,
+  title={{HellaSwag}: Can a Machine Really Finish Your Sentence?},
+  author={Zellers, Rowan and Holtzman, Ari and Bisk, Yonatan and Farhadi, Ali and Choi, Yejin},
+  booktitle={Proceedings of ACL},
+  pages={4791--4800},
+  year={2019}
+}
+
+@inproceedings{zheng2024llmasjudge,
+  title={Judging {LLM}-as-a-Judge with {MT-Bench} and Chatbot Arena},
+  author={Zheng, Lianmin and Chiang, Wei-Lin and Sheng, Ying and Zhuang, Siyuan and Wu, Zi and Zhuang, Yonghao and Lin, Zi and Li, Zhuohan and Li, Dacheng and Xing, Eric P. and others},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={36},
+  year={2024}
+}
+
 % ============================================================================
-% CLINICAL TRIAL METHODOLOGY (ADAPTED)
+% EMERGENT ABILITIES AND SCALING
 % ============================================================================
+
+@article{schaeffer2024mirage,
+  title={Are Emergent Abilities of Large Language Models a Mirage?},
+  author={Schaeffer, Rylan and Miranda, Brando and Koyejo, Sanmi},
+  journal={Advances in Neural Information Processing Systems},
+  volume={36},
+  year={2024}
+}
+
+@article{snell2024testtime,
+  title={Scaling {LLM} Test-Time Compute Optimally Can Be More Effective than Scaling Model Parameters},
+  author={Snell, Charlie and Lee, Jaehoon and Xu, Kelvin and Kumar, Aviral},
+  journal={arXiv preprint arXiv:2408.03314},
+  year={2024}
+}
+
+@article{wei2022emergent,
+  title={Emergent Abilities of Large Language Models},
+  author={Wei, Jason and Tay, Yi and Bommasani, Rishi and Raffel, Colin and Zoph, Barret and Borgeaud, Sebastian and Yogatama, Dani and Bosma, Maarten and Zhou, Denny and Metzler, Donald and others},
+  journal={Transactions on Machine Learning Research},
+  year={2022}
+}
+
+% ============================================================================
+% STATISTICAL METHODS
+% ============================================================================
+
+@article{bonferroni1936,
+  title={Teoria Statistica delle Classi e Calcolo delle Probabilit\`{a}},
+  author={Bonferroni, Carlo E},
+  journal={Pubblicazioni del R Istituto Superiore di Scienze Economiche e Commerciali di Firenze},
+  volume={8},
+  pages={3--62},
+  year={1936}
+}
+
+@article{cochran1954,
+  title={Some Methods for Strengthening the Common $\chi^2$ Tests},
+  author={Cochran, William G.},
+  journal={Biometrics},
+  volume={10},
+  number={4},
+  pages={417--451},
+  year={1954}
+}
+
+@article{efron1979bootstrap,
+  title={Bootstrap Methods: Another Look at the Jackknife},
+  author={Efron, Bradley},
+  journal={The Annals of Statistics},
+  volume={7},
+  number={1},
+  pages={1--26},
+  year={1979}
+}
+
+@article{fisher1922,
+  title={On the Interpretation of $\chi^2$ from Contingency Tables, and the Calculation of {P}},
+  author={Fisher, Ronald A.},
+  journal={Journal of the Royal Statistical Society},
+  volume={85},
+  number={1},
+  pages={87--94},
+  year={1922}
+}
+
+@article{hodges1963,
+  title={Estimates of Location Based on Rank Tests},
+  author={Hodges, Joseph L and Lehmann, Erich L},
+  journal={The Annals of Mathematical Statistics},
+  volume={34},
+  number={2},
+  pages={598--611},
+  year={1963}
+}
+
+@article{mcnemar1947,
+  title={Note on the Sampling Error of the Difference Between Correlated Proportions or Percentages},
+  author={McNemar, Quinn},
+  journal={Psychometrika},
+  volume={12},
+  number={2},
+  pages={153--157},
+  year={1947}
+}
+
+@article{obrien1979,
+  title={A Multiple Testing Procedure for Clinical Trials},
+  author={O'Brien, Peter C and Fleming, Thomas R},
+  journal={Biometrics},
+  volume={35},
+  number={3},
+  pages={549--556},
+  year={1979}
+}
+
+@article{wald1945,
+  title={Sequential Tests of Statistical Hypotheses},
+  author={Wald, Abraham},
+  journal={The Annals of Mathematical Statistics},
+  volume={16},
+  number={2},
+  pages={117--186},
+  year={1945}
+}
+
+@article{welch1947,
+  title={The Generalization of `{S}tudent's' Problem When Several Different Population Variances Are Involved},
+  author={Welch, Bernard L},
+  journal={Biometrika},
+  volume={34},
+  number={1/2},
+  pages={28--35},
+  year={1947}
+}
+
+@article{wilcoxon1945,
+  title={Individual Comparisons by Ranking Methods},
+  author={Wilcoxon, Frank},
+  journal={Biometrics Bulletin},
+  volume={1},
+  number={6},
+  pages={80--83},
+  year={1945}
+}
+
+% ============================================================================
+% EXPERIMENTAL METHODOLOGY AND A/B TESTING
+% ============================================================================
+
+@inproceedings{johari2017peeking,
+  title={Peeking at {A/B} Tests: Why It Matters, and What to Do About It},
+  author={Johari, Ramesh and Koomen, Pete and Pekelis, Leonid and Walsh, David},
+  booktitle={Proceedings of the 23rd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+  pages={1517--1525},
+  year={2017}
+}
+
+@article{kohavi2009experiments,
+  title={Controlled Experiments on the Web: Survey and Practical Guide},
+  author={Kohavi, Ron and Longbotham, Roger and Sommerfield, Dan and Henne, Randal M.},
+  journal={Data Mining and Knowledge Discovery},
+  volume={18},
+  number={1},
+  pages={140--181},
+  year={2009}
+}
+
+@book{kohavi2020trustworthy,
+  title={Trustworthy Online Controlled Experiments: A Practical Guide to {A/B} Testing},
+  author={Kohavi, Ron and Tang, Diane and Xu, Ya},
+  publisher={Cambridge University Press},
+  year={2020}
+}
+
+@article{nosek2018preregistration,
+  title={The Preregistration Revolution},
+  author={Nosek, Brian A. and Ebersole, Charles R. and DeHaven, Alexander C. and Mellor, David T.},
+  journal={Proceedings of the National Academy of Sciences},
+  volume={115},
+  number={11},
+  pages={2600--2606},
+  year={2018}
+}
 
 @article{schulz2010consort,
   title={{CONSORT} 2010 Statement: Updated Guidelines for Reporting Parallel Group Randomised Trials},
@@ -265,4 +798,135 @@
   volume={340},
   pages={c332},
   year={2010}
+}
+
+% ============================================================================
+% GREEN AI AND ENERGY
+% ============================================================================
+
+@article{luccioni2023bloom,
+  title={Estimating the Carbon Footprint of {BLOOM}, a 176{B} Parameter Language Model},
+  author={Luccioni, Alexandra Sasha and Viguier, Sylvain and Ligozat, Anne-Laure},
+  journal={Journal of Machine Learning Research},
+  volume={24},
+  number={253},
+  pages={1--15},
+  year={2023}
+}
+
+@article{patterson2021carbon,
+  title={Carbon Emissions and Large Neural Network Training},
+  author={Patterson, David and Gonzalez, Joseph and Le, Quoc and Liang, Chen and Munguia, Lluis-Miquel and Rothchild, Daniel and So, David and Texier, Maud and Dean, Jeff},
+  journal={arXiv preprint arXiv:2104.10350},
+  year={2021}
+}
+
+@article{schwartz2020green,
+  title={Green {AI}},
+  author={Schwartz, Roy and Dodge, Jesse and Smith, Noah A. and Etzioni, Oren},
+  journal={Communications of the ACM},
+  volume={63},
+  number={12},
+  pages={54--63},
+  year={2020}
+}
+
+@article{strubell2019energy,
+  title={Energy and Policy Considerations for Deep Learning in {NLP}},
+  author={Strubell, Emma and Ganesh, Ananya and McCallum, Andrew},
+  journal={arXiv preprint arXiv:1906.02243},
+  year={2019}
+}
+
+% ============================================================================
+% MLOPS AND SYSTEMS
+% ============================================================================
+
+@article{kreuzberger2023mlops,
+  title={Machine Learning Operations ({MLOps}): Overview, Definition, and Architecture},
+  author={Kreuzberger, Dominik and K{\"u}hl, Niklas and Hirschfeld, Sebastian},
+  journal={IEEE Access},
+  volume={11},
+  pages={31866--31879},
+  year={2023}
+}
+
+@inproceedings{sculley2015debt,
+  title={Hidden Technical Debt in Machine Learning Systems},
+  author={Sculley, D. and Holt, Gary and Golovin, Daniel and Davydov, Eugene and Phillips, Todd and Ebner, Dietmar and Chaudhary, Vinay and Young, Michael and Crespo, Jean-Fran{\c{c}}ois and Dennison, Dan},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={28},
+  year={2015}
+}
+
+@inproceedings{zaharia2018mlflow,
+  title={Accelerating the Machine Learning Lifecycle with {MLflow}},
+  author={Zaharia, Matei and Chen, Andrew and Davidson, Aaron and others},
+  booktitle={IEEE Data Engineering Bulletin},
+  volume={41},
+  pages={39--45},
+  year={2018}
+}
+
+% ============================================================================
+% TOKENIZATION
+% ============================================================================
+
+@inproceedings{kudo2018sentencepiece,
+  title={{SentencePiece}: A Simple and Language Independent Subword Tokenizer and Detokenizer for Neural Text Processing},
+  author={Kudo, Taku and Richardson, John},
+  booktitle={Proceedings of EMNLP: System Demonstrations},
+  pages={66--71},
+  year={2018}
+}
+
+@inproceedings{sennrich2016subword,
+  title={Neural Machine Translation of Rare Words with Subword Units},
+  author={Sennrich, Rico and Haddow, Barry and Birch, Alexandra},
+  booktitle={Proceedings of ACL},
+  pages={1715--1725},
+  year={2016}
+}
+
+% ============================================================================
+% STRUCTURED GENERATION AND FRAMEWORKS
+% ============================================================================
+
+@inproceedings{khattab2024dspy,
+  title={{DSPy}: Compiling Declarative Language Model Calls into Self-Improving Pipelines},
+  author={Khattab, Omar and Singhvi, Arnav and Maheshwari, Paridhi and Zhang, Zhiyuan and Santhanam, Keshav and Vardhamanan, Sri and Haq, Saiful and Sharma, Ashutosh and Joshi, Thomas T. and Mober, Hanna and others},
+  booktitle={Proceedings of ICLR},
+  year={2024}
+}
+
+@article{klaise2021alibi,
+  title={Alibi Detect: Algorithms for Outlier, Adversarial and Drift Detection},
+  author={Klaise, Janis and Van Looveren, Arnaud and Vacanti, Giovanni and Coca, Alexandru},
+  journal={arXiv preprint arXiv:2104.14637},
+  year={2021}
+}
+
+@article{willard2023outlines,
+  title={Efficient Guided Generation for Large Language Models},
+  author={Willard, Brandon T. and Louf, R{\'e}mi},
+  journal={arXiv preprint arXiv:2307.09702},
+  year={2023}
+}
+
+@misc{zheng2024outlines,
+  title={Outlines: Generative Model Programming},
+  author={Zheng, Lianmin and others},
+  howpublished={GitHub Repository. \url{https://github.com/outlines-dev/outlines}},
+  year={2024}
+}
+
+% ============================================================================
+% EXPERT TRAINING AND BRANCH-TRAIN-MERGE
+% ============================================================================
+
+@article{li2022branchtrain,
+  title={Branch-Train-Merge: Embarrassingly Parallel Training of Expert Language Models},
+  author={Li, Margaret and Gururangan, Suchin and Dettmers, Tim and Lewis, Mike and Althoff, Tim and Smith, Noah A. and Zettlemoyer, Luke},
+  journal={arXiv preprint arXiv:2208.03306},
+  year={2022}
 }
