@@ -266,7 +266,18 @@ def start_vllm_server(model_id, port, gpu_mem=0.85):
         "--enforce-eager",
         "--no-enable-log-requests",
     ]
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    log_dir = Path.home() / "article8" / "rct_results"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    slug = model_id.replace("/", "_")
+    vllm_log = open(log_dir / f"vllm_{slug}.log", "w")
+    env = os.environ.copy()
+    env["CUDA_HOME"] = "/usr/local/cuda"
+    proc = subprocess.Popen(
+        cmd, stdout=vllm_log, stderr=subprocess.STDOUT,
+        env=env, start_new_session=True,
+    )
+    proc._vllm_log = vllm_log
+    return proc
 
 
 def wait_for_health(base_url, timeout=HEALTH_TIMEOUT_S):
@@ -276,7 +287,9 @@ def wait_for_health(base_url, timeout=HEALTH_TIMEOUT_S):
         try:
             r = requests.get(f"{base_url}/health", timeout=5)
             if r.status_code == 200:
-                return True
+                m = requests.get(f"{base_url}/v1/models", timeout=10)
+                if m.status_code == 200:
+                    return True
         except Exception:
             pass
         time.sleep(5)
@@ -284,14 +297,21 @@ def wait_for_health(base_url, timeout=HEALTH_TIMEOUT_S):
 
 
 def stop_vllm_server(proc):
+    if hasattr(proc, "_vllm_log"):
+        proc._vllm_log.close()
     if proc.poll() is not None:
         return
-    proc.send_signal(signal.SIGTERM)
+    pgid = os.getpgid(proc.pid)
     try:
-        proc.wait(timeout=30)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        proc.wait(timeout=10)
+        os.killpg(pgid, signal.SIGTERM)
+        proc.wait(timeout=15)
+    except (subprocess.TimeoutExpired, ProcessLookupError):
+        try:
+            os.killpg(pgid, signal.SIGKILL)
+            proc.wait(timeout=10)
+        except (ProcessLookupError, subprocess.TimeoutExpired):
+            pass
+    kill_port(8002)
     time.sleep(GPU_COOLDOWN_S)
 
 
