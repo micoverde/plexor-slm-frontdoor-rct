@@ -1,6 +1,6 @@
 % arXiv Preprint
 % Front-Door Routing with Small Language Models: A Harmonized Benchmark
-% and Pre-Registered RCT Reveal a 6-8 Point Gap to Production Viability
+% and Pre-Registered Randomized Experiment Reveal a 6-8 Point Gap to Production Viability
 % Article 8 in the TAAC Research Series
 
 \documentclass{article}
@@ -64,7 +64,7 @@
   \begin{tabular}[t]{c}%
 }
 
-\title{Front-Door Routing with Small Language Models:\\A Harmonized Benchmark and Pre-Registered RCT\\Reveal a 6--8 Point Gap to Production Viability}
+\title{Front-Door Routing with Small Language Models:\\A Harmonized Benchmark and Pre-Registered Randomized Experiment\\Reveal a 6--8 Point Gap to Production Viability}
 
 \author{
   Warren Johnson\thanks{Corresponding author. E-mail: \texttt{warrenjo@plexor.dev}}\\
@@ -85,7 +85,7 @@
 \begin{abstract}
 No current small language model---including a 671B mixture-of-experts architecture---meets the 85\% accuracy threshold required for standalone production front-door routing on a 6-class task taxonomy. We establish this through two complementary studies on a production LLM inference routing system.
 \textbf{Study~1 (Harmonized Offline Benchmark):} Three candidate SLMs---Phi-3.5-mini (3.8B), Qwen2.5-1.5B (1.5B), and Qwen-2.5-3B (3.0B)---evaluated on identical hardware (Azure T4), identical serving stack (vLLM 0.17.1, bitsandbytes 4-bit NF4), and identical 60-case corpus, with exclusive GPU allocation. Qwen-2.5-3B achieves the highest accuracy ($0.783$) with perfect parse rate and $1{,}088$\,ms median latency; pairwise McNemar tests confirm it is statistically indistinguishable from Phi-3.5-mini ($p = 0.503$) at $5.3\times$ lower latency. It is the only model achieving non-zero accuracy on all six task families.
-\textbf{Study~2 (Four-Arm RCT, $N = 400$/arm):} Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 evaluated against a no-routing control with SHA-256 session-ID randomization and pre-registered viable-region gates ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). DeepSeek-V3 achieves the highest accuracy ($0.830$) but fails both gates. Phi-4-mini regresses to $0.518$, suggesting next-generation Phi has traded classification capability for generative instruction-following. Per the pre-registered decision matrix, the recommended deployment is Qwen-2.5-3B as primary front-door with DeepSeek-V3 fallback for hard classifications. The 6--8 percentage point gap to standalone viability represents a concrete target for fine-tuning, taxonomy refinement, or next-generation SLMs.
+\textbf{Study~2 (Four-Arm Randomized Experiment, $N = 400$/arm, $n_{\text{eff}} = 60$ unique cases):} Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 evaluated against a no-routing control under synthetic traffic with SHA-256 session-ID randomization and pre-registered viable-region gates ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). Because traffic is generated from the same 60-case corpus with deterministic decoding, the effective sample size for accuracy is $n_{\text{eff}} = 60$, not 400; the larger $N$ supports latency and cost comparisons. DeepSeek-V3 achieves the highest accuracy ($0.830$) but fails both gates. Phi-4-mini scores only $0.518$---substantially below Phi-3.5-mini's harmonized result ($0.717$)---though this cross-study comparison confounds model version with prompt--tokenizer interactions and should be interpreted descriptively, not as evidence of architectural regression. Per the pre-registered decision matrix, the recommended deployment is Qwen-2.5-3B as primary front-door with DeepSeek-V3 fallback for hard classifications. The 6--8 percentage point gap to standalone viability represents a concrete target for fine-tuning, taxonomy refinement, or next-generation SLMs.
 
 \textbf{Keywords:} model routing, small language models, front-door classification, randomized controlled trial, latency-quality tradeoff, Pareto frontier, reproducibility
 \end{abstract}
@@ -93,7 +93,7 @@ No current small language model---including a 671B mixture-of-experts architectu
 \vspace{0.5em}
 \noindent\rule{\textwidth}{0.4pt}
 \vspace{0.3em}
-\noindent\textbf{Series position.} This is Article~8 in the \taac{} Research Series. Articles 1--3 established task-dependent compression thresholds and the perplexity paradox mechanism \citep{johnson2026compress,johnson2026perplexity,johnson2026cliff}. Articles 4--5 documented provider-dependent output token explosion under compression \citep{johnson2026greenai,johnson2026benchmark}. Article~6 validated benchmark-derived thresholds in a production RCT ($N = 358$, six arms, CONSORT reporting) \citep{johnson2026rct}. Article~7 designed tokenizer-aware prompt languages achieving up to 64.7\% token reduction \citep{johnson2026promptlang}. This article shifts from \emph{what to compress} to \emph{which model should decide}---extending the ``route'' branch of the Article~1 dichotomy into model selection. Version~8 of this paper replaces the earlier pilot benchmark and generational bridge studies with a harmonized three-model benchmark eliminating cross-study confounds, and reports full execution results of the four-arm RCT.
+\noindent\textbf{Series position.} This is Article~8 in the \taac{} Research Series. Articles 1--3 established task-dependent compression thresholds and the perplexity paradox mechanism \citep{johnson2026compress,johnson2026perplexity,johnson2026cliff}. Articles 4--5 documented provider-dependent output token explosion under compression \citep{johnson2026greenai,johnson2026benchmark}. Article~6 validated benchmark-derived thresholds in a production RCT ($N = 358$, six arms, CONSORT reporting) \citep{johnson2026rct}. Article~7 designed tokenizer-aware prompt languages achieving up to 64.7\% token reduction \citep{johnson2026promptlang}. This article shifts from \emph{what to compress} to \emph{which model should decide}---extending the ``route'' branch of the Article~1 dichotomy into model selection. Version~8 of this paper replaces the earlier pilot benchmark and generational bridge studies with a harmonized three-model benchmark eliminating cross-study confounds, and reports full execution results of a four-arm randomized experiment under synthetic traffic.
 \vspace{0.5em}
 \noindent\rule{\textwidth}{0.4pt}
 
@@ -107,11 +107,11 @@ The cost structure of large language model (LLM) inference creates a natural inc
 
 The front-door is itself a model-selection problem. Cheaper small language models (SLMs) in the 1--4B parameter range offer sub-second latency but can fail at nuanced task-taxonomy boundaries; stronger SLMs or even full-scale models improve classification quality but may violate latency budgets, introduce external API dependencies, or negate cost savings by consuming the very inference budget they are meant to protect \citep{chen2023frugalgpt}. This tradeoff is amplified when teams require both \emph{scientific validity}---paired significance tests, dataset immutability, reproducibility---and \emph{operational validity}---health checks, logging schema, alertability, arm isolation. The tension between these two modes of validity is rarely acknowledged in the routing literature, where most work evaluates routing quality in isolation from the operational infrastructure that must sustain it in production \citep{madaan2023automix}.
 
-The challenge is further compounded by the rapid pace of SLM development. The transformer architecture \citep{vaswani2017attention} has been adapted into increasingly efficient small-scale variants, from the Phi family's textbook-quality training data approach \citep{gunasekar2023phi1,li2023phi15,javaheripi2023phi2,abdin2024phi3,abdin2024phi4} to the Qwen family's multilingual scaling strategy \citep{yang2024qwen2,yang2024qwen25} and the open-weight ecosystem of Llama \citep{touvron2023llama2,meta2024llama3}, Gemma \citep{gemma2024gemma2,gemma2024gemma}, Mistral \citep{jiang2023mistral,jiang2024mixtral}, TinyLlama \citep{zhang2024tinyllama}, StableLM \citep{zhu2024stablelm}, and the TinyStories line of research demonstrating surprisingly coherent generation from sub-billion-parameter models \citep{eldan2023tinystories}. Each new release reshuffles the Pareto frontier of quality versus cost, rendering previously optimal routing configurations suboptimal within months. This ``model churn'' problem means that any static evaluation of routing models is inherently time-limited---a finding that motivates our multi-study design, which progresses from a locked offline benchmark through a generational bridge experiment to a pre-registered RCT that can accommodate future model candidates.
+The challenge is further compounded by the rapid pace of SLM development. The transformer architecture \citep{vaswani2017attention} has been adapted into increasingly efficient small-scale variants, from the Phi family's textbook-quality training data approach \citep{gunasekar2023phi1,li2023phi15,javaheripi2023phi2,abdin2024phi3,abdin2024phi4} to the Qwen family's multilingual scaling strategy \citep{yang2024qwen2,yang2024qwen25} and the open-weight ecosystem of Llama \citep{touvron2023llama2,meta2024llama3}, Gemma \citep{gemma2024gemma2,gemma2024gemma}, Mistral \citep{jiang2023mistral,jiang2024mixtral}, TinyLlama \citep{zhang2024tinyllama}, StableLM \citep{zhu2024stablelm}, and the TinyStories line of research demonstrating surprisingly coherent generation from sub-billion-parameter models \citep{eldan2023tinystories}. Each new release reshuffles the Pareto frontier of quality versus cost, rendering previously optimal routing configurations suboptimal within months. This ``model churn'' problem means that any static evaluation of routing models is inherently time-limited---a finding that motivates our multi-study design, which progresses from a locked offline benchmark through a generational bridge experiment to a pre-registered randomized experiment that can accommodate future model candidates.
 
 Article~1 in this series \citep{johnson2026compress} demonstrated a fundamental dichotomy: code-generation tasks benefit from compression-first strategies (Cohen's $d = 1.84$ over 2,650 trials), while chain-of-thought reasoning benefits from routing to appropriately-capable models. That finding established \emph{routing} as a first-class cost-reduction mechanism parallel to compression. But it left open the question of \emph{which model performs the routing itself}---the subject of the present article. The distinction is important: while prior work on learned routing \citep{jiang2023routellm,ong2025routellm} trains a dedicated classifier on preference data, and cascade architectures \citep{madaan2023automix,yue2024cascades} invoke multiple models per query, our front-door approach requires a single SLM to make an interpretable, discrete classification decision using only the raw prompt text. This constraint---single model, single pass, discrete output---places unique demands on SLM capability that differ from the generative and reasoning tasks on which SLMs are typically benchmarked \citep{hendrycks2021mmlu,clark2018arc,zellers2019hellaswag,bigcode2023evaluation,austin2021mbpp}. The question of which SLM should serve as the front-door classifier also intersects with emerging work on test-time compute scaling \citep{snell2024testtime} and speculative decoding \citep{leviathan2023speculative,chen2023speculative}, suggesting that the traditional tradeoff between model size and inference speed may be more nuanced than a simple parameter-count comparison implies.
 
-We contribute two complementary studies spanning the full path from offline evaluation through production deployment: (1) a \textbf{harmonized offline benchmark} (Study~1, \S\ref{sec:methods1}--\S\ref{sec:results1}) comparing three SLMs on identical hardware, serving stack, and corpus with pairwise McNemar tests; and (2) an \textbf{executed four-arm RCT} (Study~2, \S\ref{sec:rct-design}--\S\ref{sec:rct-results}) with $N = 400$ per arm, SHA-256 session-ID randomization, and a pre-registered decision matrix with viable-region gates. Beyond the empirical findings, this paper makes three methodological contributions: a harmonized evaluation protocol that eliminates cross-study hardware, framework, and corpus confounds (\S\ref{sec:methods1}), drawing on best practices from clinical trial design \citep{schulz2010consort} and trustworthy online experimentation \citep{kohavi2020trustworthy,kohavi2009experiments}; a pre-registered multi-arm RCT adapted from clinical trial methodology, including Bonferroni correction for six hypotheses, O'Brien-Fleming interim boundaries \citep{obrien1979}, and sequential testing principles \citep{wald1945}; and a transparent reporting of negative results---no arm meets the pre-registered viable region---with actionable deployment recommendations derived mechanically from the decision matrix.
+We contribute two complementary studies spanning the full path from offline evaluation through production deployment: (1) a \textbf{harmonized offline benchmark} (Study~1, \S\ref{sec:methods1}--\S\ref{sec:results1}) comparing three SLMs on identical hardware, serving stack, and corpus with pairwise McNemar tests; and (2) an \textbf{executed four-arm randomized experiment under synthetic traffic} (Study~2, \S\ref{sec:rct-design}--\S\ref{sec:rct-results}) with $N = 400$ per arm ($n_{\text{eff}} = 60$ for accuracy; see \S\ref{sec:rct-results}), SHA-256 session-ID randomization, and a pre-registered decision matrix with viable-region gates. Beyond the empirical findings, this paper makes three methodological contributions: a harmonized evaluation protocol that eliminates cross-study hardware, framework, and corpus confounds (\S\ref{sec:methods1}), drawing on best practices from clinical trial design \citep{schulz2010consort} and trustworthy online experimentation \citep{kohavi2020trustworthy,kohavi2009experiments}; a pre-registered multi-arm randomized experiment adapted from online A/B testing methodology \citep{kohavi2020trustworthy}, including Bonferroni correction for six hypotheses, O'Brien-Fleming interim boundaries \citep{obrien1979}, and sequential testing principles \citep{wald1945}; and a transparent reporting of negative results---no arm meets the pre-registered viable region---with actionable deployment recommendations derived mechanically from the decision matrix.
 
 \subsection{The Model Selection Problem for Front-Door Routing}
 \label{sec:model-selection}
@@ -151,9 +151,9 @@ The overarching research question is: \emph{Which small language model backend m
 
 \textbf{Study~2 hypotheses (pre-registered, now validated).}
 
-\begin{hypothesis}[H5: Routing Accuracy]
+\begin{hypothesis}[H5: Routing Accuracy (Treatment Arms Only)]
 \label{hyp:routing}
-\emph{Routing accuracy differs across arms, with expected ordering $D > C \geq B > A$. Success threshold: $\geq 85\%$ for the winning arm.}
+\emph{Routing accuracy differs across treatment arms B, C, and D, with expected ordering $D > C \geq B$. Arm~A (control) has undefined routing accuracy and is excluded from this endpoint; comparisons of treatment arms against Arm~A test the end-to-end impact of routing on cost and quality under separate endpoints (H6, H8). Success threshold: $\geq 85\%$ for the winning treatment arm. Pairwise tests: three comparisons (B\,vs.\,C, B\,vs.\,D, C\,vs.\,D) with Holm-Bonferroni correction.}
 \end{hypothesis}
 
 \begin{hypothesis}[H6: Total Cost]
@@ -245,7 +245,7 @@ Table~\ref{tab:pilot-overall} presents the harmonized 60-case benchmark results.
 
 \begin{table}[htbp]
 \centering
-\caption{Harmonized 60-case benchmark metrics (Azure T4, vLLM 0.17.1, bitsandbytes 4-bit NF4, exclusive GPU, 2026-03-15/16).\footnotemark}
+\caption{Harmonized 60-case benchmark metrics (Azure T4, vLLM 0.17.1, bitsandbytes 4-bit NF4, exclusive GPU, 2026-03-15/16).\protect\footnotemark}
 \label{tab:pilot-overall}
 \begin{tabular}{lccc}
 \toprule
@@ -292,11 +292,11 @@ Family & Phi-3.5-mini & Qwen2.5-1.5B & Qwen-2.5-3B & Best Model \\
 \begin{axis}[
     width=0.85\textwidth,
     height=0.55\textwidth,
-    xlabel={Median Latency (ms)},
+    xlabel={P95 Latency (ms)},
     ylabel={Exact Classification Accuracy},
-    xmin=0, xmax=6500,
+    xmin=0, xmax=7000,
     ymin=0, ymax=1.05,
-    xtick={0,1000,2000,3000,4000,5000,6000},
+    xtick={0,1000,2000,3000,4000,5000,6000,7000},
     xticklabel style={/pgf/number format/fixed, /pgf/number format/1000 sep={,}},
     ytick={0,0.2,0.4,0.6,0.8,1.0},
     legend pos=south east,
@@ -308,36 +308,36 @@ Family & Phi-3.5-mini & Qwen2.5-1.5B & Qwen-2.5-3B & Best Model \\
 \node[anchor=south west, font=\scriptsize\bfseries, green!50!black] at (axis cs:50,0.86) {Viable};
 
 % Production threshold line
-\draw[dashed, red!70!black, thick] (axis cs:0,0.85) -- (axis cs:6500,0.85);
-\node[anchor=south west, font=\scriptsize, red!70!black] at (axis cs:3800,0.855) {Accuracy = 0.85};
+\draw[dashed, red!70!black, thick] (axis cs:0,0.85) -- (axis cs:7000,0.85);
+\node[anchor=south west, font=\scriptsize, red!70!black] at (axis cs:4500,0.855) {Accuracy = 0.85};
 
 % Latency SLA line
 \draw[dashed, blue!70!black, thick] (axis cs:2000,0) -- (axis cs:2000,1.05);
 \node[anchor=south west, font=\scriptsize, blue!70!black, rotate=90] at (axis cs:2050,0.10) {P95 $\leq$ 2{,}000\,ms};
 
-% Study 1 (Harmonized Benchmark) — filled markers
-\addplot[only marks, mark=*, mark size=4pt, red!80!black] coordinates {(793,0.400)};
-\node[anchor=north west, font=\scriptsize] at (axis cs:850,0.39) {Qwen-1.5B};
+% Study 1 (Harmonized Benchmark) — filled markers, P95 values
+\addplot[only marks, mark=*, mark size=4pt, red!80!black] coordinates {(4636,0.400)};
+\node[anchor=north west, font=\scriptsize] at (axis cs:4700,0.39) {Qwen-1.5B};
 
-\addplot[only marks, mark=triangle*, mark size=5pt, teal!80!black] coordinates {(1088,0.783)};
-\node[anchor=south west, font=\scriptsize] at (axis cs:1150,0.785) {Qwen-3B};
+\addplot[only marks, mark=triangle*, mark size=5pt, teal!80!black] coordinates {(1554,0.783)};
+\node[anchor=south west, font=\scriptsize] at (axis cs:1620,0.785) {Qwen-3B};
 
-\addplot[only marks, mark=square*, mark size=4pt, blue!80!black] coordinates {(5772,0.717)};
-\node[anchor=south west, font=\scriptsize] at (axis cs:5850,0.72) {Phi-3.5};
+\addplot[only marks, mark=square*, mark size=4pt, blue!80!black] coordinates {(6357,0.717)};
+\node[anchor=south west, font=\scriptsize] at (axis cs:6420,0.72) {Phi-3.5};
 
-% Study 2 (RCT) — open markers
-\addplot[only marks, mark=square, mark size=4pt, blue!80!black] coordinates {(977,0.518)};
-\node[anchor=north west, font=\scriptsize] at (axis cs:500,0.50) {Phi-4$^{\text{R}}$};
+% Study 2 (Experiment) — open markers, P95 values
+\addplot[only marks, mark=square, mark size=4pt, blue!80!black] coordinates {(1541,0.518)};
+\node[anchor=north east, font=\scriptsize] at (axis cs:1480,0.50) {Phi-4$^{\text{E}}$};
 
-\addplot[only marks, mark=triangle, mark size=5pt, teal!80!black] coordinates {(988,0.793)};
-\node[anchor=south east, font=\scriptsize] at (axis cs:930,0.80) {3B$^{\text{R}}$};
+\addplot[only marks, mark=triangle, mark size=5pt, teal!80!black] coordinates {(1170,0.793)};
+\node[anchor=south east, font=\scriptsize] at (axis cs:1110,0.80) {3B$^{\text{E}}$};
 
-\addplot[only marks, mark=diamond*, mark size=5pt, purple!80!black] coordinates {(1854,0.830)};
-\node[anchor=south east, font=\scriptsize] at (axis cs:1800,0.835) {DS-V3$^{\text{R}}$};
+\addplot[only marks, mark=diamond*, mark size=5pt, purple!80!black] coordinates {(2295,0.830)};
+\node[anchor=south west, font=\scriptsize] at (axis cs:2360,0.835) {DS-V3$^{\text{E}}$};
 
 \end{axis}
 \end{tikzpicture}
-\caption{Accuracy--latency scatterplot for all evaluated models. Filled markers: Study~1 harmonized benchmark (identical hardware). Open markers: Study~2 RCT ($N\!=\!400$/arm). The shaded green region marks the viable operating zone (accuracy $\geq 0.85$, latency $\leq 2{,}000$\,ms). No model enters the viable region. DeepSeek-V3 approaches the accuracy threshold but exceeds the latency gate ($P95 = 2{,}295$\,ms). Qwen-2.5-3B is Pareto-dominant among self-hosted models.}
+\caption{Accuracy--P95 latency scatterplot for all evaluated models. Both axes now use the pre-registered gating metrics: exact-match accuracy ($y$) and P95 latency ($x$). Filled markers: Study~1 harmonized benchmark (identical hardware). Open markers ($^{\text{E}}$): Study~2 randomized experiment ($n_{\text{eff}}\!=\!60$). The shaded green region marks the viable operating zone (accuracy $\geq 0.85$, P95 $\leq 2{,}000$\,ms). No model enters the viable region. DeepSeek-V3 approaches the accuracy threshold but exceeds the latency gate ($P95 = 2{,}295$\,ms). Qwen-2.5-3B is Pareto-dominant among self-hosted models.}
 \label{fig:scatter}
 \end{figure}
 
@@ -356,16 +356,16 @@ Family & Phi-3.5-mini & Qwen2.5-1.5B & Qwen-2.5-3B & Best Model \\
 % ════════════════════════════════════════════════════════════════════
 % 4. STUDY 2: FOUR-ARM RCT DESIGN AND RESULTS
 % ════════════════════════════════════════════════════════════════════
-\section{Study~2: Four-Arm RCT Design}
+\section{Study~2: Four-Arm Randomized Experiment Design}
 \label{sec:rct-design}
 
-Study~1 established offline quality-latency profiles for three SLM classifiers. Study~2 translates these findings into a pre-registered randomized controlled trial with $N = 400$ per arm, evaluating front-door routing under synthetic traffic conditions with endpoint isolation, cost attribution, and pre-registered decision criteria. The RCT uses synthetic traffic generated from the same frozen corpus (SHA \texttt{dac3aac5}).
+Study~1 established offline quality-latency profiles for three SLM classifiers. Study~2 translates these findings into a pre-registered randomized controlled experiment with $N = 400$ per arm, evaluating front-door routing under synthetic traffic conditions with endpoint isolation, cost attribution, and pre-registered decision criteria. The experiment uses synthetic traffic generated from the same frozen corpus (SHA \texttt{dac3aac5}). Because traffic is synthetic rather than drawn from production, and because the 60 unique corpus cases are repeated across sessions, this design provides a controlled comparison across arms but should not be interpreted as a production-traffic trial.
 
 \textbf{Trial arms.}\quad Table~\ref{tab:arms} defines the four treatment arms. Arm~A (no routing) provides the baseline against which routing value is measured. Note that Arm~A routing accuracy is undefined (no router is invoked), so comparisons involving Arm~A test cost and quality \emph{impact} of routing, while treatment-vs-treatment comparisons (B vs.\ C, B vs.\ D, C vs.\ D) test relative routing accuracy. Arm~B tests Phi-4-mini-instruct \citep{abdin2024phi4}, the next-generation Phi model and expected successor to the Study~1 Phi-3.5-mini. Arm~C tests Qwen-2.5-3B, identified in Study~1 as the Pareto-dominant offline candidate. Arm~D tests whether a full-scale MoE model (671B, 37B active) provides classification quality improvements that justify its API dependency and cost---with particular attention to the output instability documented in Articles~4--5 for the DeepSeek architecture. The inclusion of a commercial API arm alongside self-hosted arms also tests whether network latency, rate limiting, and vendor uptime affect real-world routing performance in ways that offline benchmarks cannot capture.
 
 \begin{table}[htbp]
 \centering
-\caption{Four-arm RCT treatment definitions.}
+\caption{Four-arm experiment treatment definitions.}
 \label{tab:arms}
 \begin{tabular}{clllc}
 \toprule
@@ -381,9 +381,9 @@ D & DeepSeek-V3 & DeepSeek-V3 (API) & DeepSeek commercial API & 671B MoE \\
 
 \textbf{Randomization and integrity.}\quad Assignment uses SHA-256(\texttt{session\_id}) $\bmod 4$, deterministic with no mid-session switches, following \citet{kohavi2020trustworthy}. Stratification is by prompt complexity quartile, targeting equal arm representation within $\pm 5\%$. The design is single-blind: callers do not know arm assignment; the front-door endpoint URL is identical across Arms~B, C, D. Classification, scoring, and compression prompts are identical across Arms~B, C, D.
 
-\textbf{Sample size and power.}\quad The final sample size is $N = 400$ per arm ($N_{\text{total}} = 1{,}600$) with a minimum detectable effect of 10 percentage points. This provides approximately 80\% power at the Holm-Bonferroni-corrected significance level. The primary correction method is the Holm-Bonferroni step-down procedure, which controls the family-wise error rate while providing higher power than classical Bonferroni. \emph{Caveat:} because the RCT uses synthetic traffic from a 60-case corpus with deterministic decoding, the effective sample size for accuracy-based tests is $n_{\text{eff}} = 60$, not 400 (see \S\ref{sec:rct-results}). The 80\% power estimate applies to latency and cost metrics (valid at $N = 400$) but not to classification accuracy, where power at $n = 60$ is substantially lower. Interim analysis used O'Brien-Fleming spending function boundaries at $N = 200$ per arm \citep{obrien1979}, following \citet{wald1945} and \citet{johari2017peeking}; no arms were dropped at interim.
+\textbf{Sample size and power.}\quad The nominal sample size is $N = 400$ per arm ($N_{\text{total}} = 1{,}600$). However, because the experiment uses synthetic traffic from a 60-case corpus with deterministic decoding ($T = 0.0$), repeated prompts within an arm produce identical classification outputs. The effective sample size for accuracy-based endpoints is therefore $n_{\text{eff}} = 60$ unique cases per arm, not 400. The 80\% power estimate for a 10\,pp minimum detectable effect applies to latency and cost metrics (where each of the 400 requests generates independent timing and billing data) but \emph{not} to classification accuracy, where power at $n = 60$ is substantially lower---approximately 50\% for a 15\,pp MDE at $\alpha = 0.05$ with Holm-Bonferroni correction. This is a material limitation of the synthetic-traffic design. The primary correction method is the Holm-Bonferroni step-down procedure. Interim analysis used O'Brien-Fleming spending function boundaries at $N = 200$ per arm \citep{obrien1979}, following \citet{wald1945} and \citet{johari2017peeking}; no arms were dropped at interim.
 
-\textbf{Multiplicity hierarchy.}\quad The Holm-Bonferroni step-down procedure applies \emph{within} each hypothesis to the six pairwise arm comparisons (A vs.\ B, A vs.\ C, A vs.\ D, B vs.\ C, B vs.\ D, C vs.\ D): p-values are ranked $p_{(1)} \leq \ldots \leq p_{(6)}$ and rejected if $p_{(i)} < \alpha / (6 - i + 1)$, stopping at the first non-rejection. Between hypotheses (H5--H9), which test different endpoints (routing accuracy, cost, F1, latency, compression quality), no additional correction is applied. This is standard practice for multi-arm clinical trials where hypotheses address distinct endpoints \citep{schulz2010consort}.
+\textbf{Multiplicity hierarchy.}\quad The Holm-Bonferroni step-down procedure applies \emph{within} each hypothesis to the relevant pairwise arm comparisons. For H5 (routing accuracy) and H7 (F1), only treatment arms B, C, D are compared (three pairwise tests); for H6 (cost), H8 (latency), and H9 (compression), all four arms are compared (six pairwise tests). In either case, p-values are ranked and rejected at $p_{(i)} < \alpha / (k - i + 1)$ where $k$ is the number of comparisons, stopping at the first non-rejection. Between hypotheses (H5--H9), which test different endpoints, no additional correction is applied. This follows standard practice for multi-arm experiments where hypotheses address distinct endpoints \citep{schulz2010consort,kohavi2020trustworthy}.
 
 \textbf{Statistical analysis plan.}\quad Primary tests are: routing accuracy, defect rate, and F1 via $\chi^2$ test for proportions \citep{cochran1954} with Holm-Bonferroni correction; cost and compression ratio via Welch's $t$-test \citep{welch1947} with Holm-Bonferroni correction; P95 latency via bootstrap CI comparison \citep{efron1979bootstrap}. Subgroup analysis by task-label is exploratory (uncorrected, flagged if $p < 0.01$). Pareto frontier analysis is computed over (total\_cost\_per\_request, routing\_accuracy), extending the Article~6 methodology from (cost, fidelity) to (cost, routing\_accuracy).
 
@@ -394,7 +394,7 @@ D & DeepSeek-V3 & DeepSeek-V3 (API) & DeepSeek commercial API & 671B MoE \\
 \end{equation}
 where $C_{\text{auto}}(t)$ is the cost of sending request $t$ to the default (most-expensive) model and $C_{\text{routed}}(t) = c_{\text{fd}} + C_{R(\hat{\ell}_t)}(t)$ includes the front-door classifier cost $c_{\text{fd}}$ plus the cost of the model selected by the routing table $R$. On correctly classified requests, $C_{\text{routed}} \ll C_{\text{auto}}$ for simple tasks; on misclassified requests, the downstream model may produce low-quality output requiring a retry at full cost. The break-even accuracy $a^*$ satisfies $S(a^*) = 0$; above this threshold, routing is cost-positive.
 
-\textbf{Pre-registered decision matrix.}\quad Table~\ref{tab:decision} maps RCT outcomes to deployment actions. The decision matrix is grounded in Pareto dominance over the two primary objectives:
+\textbf{Pre-registered decision matrix.}\quad Table~\ref{tab:decision} maps experiment outcomes to deployment actions. The decision matrix is grounded in Pareto dominance over the two primary objectives:
 
 \begin{proposition}[Pareto Dominance]
 \label{prop:pareto}
@@ -405,13 +405,13 @@ where $C_{\text{auto}}(t)$ is the cost of sending request $t$ to the default (mo
 \emph{with at least one strict inequality. Arms on the Pareto frontier are those not dominated by any other arm.}
 \end{proposition}
 
-The Pareto analysis is a decision-support tool operating on point estimates; statistical significance of pairwise differences is established separately via the hypothesis tests (H6--H10).
+The Pareto analysis is a decision-support tool operating on point estimates; statistical significance of pairwise differences is established separately via the hypothesis tests (H5--H9).
 
 When two frontier arms are statistically indistinguishable on primary metrics, the tie-breaking rule prefers the arm with fewer external dependencies---self-hosted (C) $>$ serverless (B) $>$ API (D)---reflecting operational preferences for data residency and vendor independence.
 
 \begin{table}[htbp]
 \centering
-\caption{Pre-registered decision matrix mapping RCT outcomes to deployment actions.}
+\caption{Pre-registered decision matrix mapping experiment outcomes to deployment actions.}
 \label{tab:decision}
 \begin{tabular}{llll}
 \toprule
@@ -429,14 +429,14 @@ DeepSeek fails latency gate & Any & Any & Eliminate D; choose B vs.\ C \\
 % ════════════════════════════════════════════════════════════════════
 % 6b. RESULTS: STUDY 2 (RCT)
 % ════════════════════════════════════════════════════════════════════
-\section{Results: Study~2 (Four-Arm RCT)}
+\section{Results: Study~2 (Four-Arm Randomized Experiment)}
 \label{sec:rct-results}
 
-Table~\ref{tab:rct-results} presents the primary RCT outcomes across all four arms ($N = 400$ per arm, $N_{\text{total}} = 1{,}600$). DeepSeek-V3 (Arm~D) achieves the highest classification accuracy ($0.830$) but fails both the pre-registered accuracy gate ($\geq 0.85$) and latency gate ($P95 \leq 2{,}000$\,ms; observed $P95 = 2{,}295$\,ms). Qwen-2.5-3B (Arm~C) achieves $0.793$ accuracy at $988$\,ms median latency with $100\%$ parse rate, consistent with the Study~1 harmonized benchmark ($0.783$). Phi-4-mini (Arm~B) achieves only $0.518$ accuracy with a $91.5\%$ parse rate---a substantial regression from the Phi-3.5-mini harmonized result ($0.717$), suggesting the Phi-4-mini architecture may be less suited to constrained JSON classification despite improved instruction following on generative tasks.
+Table~\ref{tab:rct-results} presents the primary outcomes across all four arms ($N = 400$ per arm, $N_{\text{total}} = 1{,}600$; $n_{\text{eff}} = 60$ for accuracy). DeepSeek-V3 (Arm~D) achieves the highest classification accuracy ($0.830$) but fails both the pre-registered accuracy gate ($\geq 0.85$) and latency gate ($P95 \leq 2{,}000$\,ms; observed $P95 = 2{,}295$\,ms). Qwen-2.5-3B (Arm~C) achieves $0.793$ accuracy at $988$\,ms median latency with $100\%$ parse rate, consistent with the Study~1 harmonized benchmark ($0.783$). Phi-4-mini (Arm~B) achieves only $0.518$ accuracy with a $91.5\%$ parse rate---substantially below the Phi-3.5-mini harmonized result ($0.717$). This cross-study comparison confounds model version with tokenizer differences, prompt sensitivity, and possible instruction-tuning changes; the gap should be interpreted descriptively rather than attributed to a specific architectural cause.
 
 \begin{table}[htbp]
 \centering
-\caption{Study~2 RCT results ($N = 400$ per arm, corpus SHA \texttt{dac3aac5}, 2026-03-16).}
+\caption{Study~2 results ($N = 400$ sessions per arm, $n_{\text{eff}} = 60$ for accuracy; corpus SHA \texttt{dac3aac5}, 2026-03-16).}
 \label{tab:rct-results}
 \begin{tabular}{clccccc}
 \toprule
@@ -450,25 +450,33 @@ D & DeepSeek-V3 & $\mathbf{0.830}$ & $\mathbf{1.000}$ & 1{,}854\,ms & 2{,}295\,m
 \end{tabular}
 
 \smallskip
-{\footnotesize Bold: best per column among treatment arms. Arms B/C: self-hosted vLLM on T4; Arm D: commercial API. Cost column shows marginal per-request API billing only. Arms B/C report \$0 marginal cost but incur fixed infrastructure cost ($\sim$\$0.75/hr GPU rental, not amortized per-request). Cost is total for 400 requests.}
+{\footnotesize Bold: best per column among treatment arms. Arms B/C: self-hosted vLLM on T4; Arm D: commercial API. \textbf{Cost column shows marginal front-door API billing only}---not the total request cost (front-door + downstream routing) formalized in Eq.~\eqref{eq:savings}. Arms B/C report \$0 marginal cost but incur fixed infrastructure cost ($\sim$\$0.75/hr GPU rental, not amortized per-request). Arm D cost is cumulative over 400 requests. The total cost endpoint (H6) requires downstream routing execution, which the synthetic-traffic design does not provide; see ``Pre-registered endpoints'' below.}
 \end{table}
 
 \textbf{Parse rate and effective accuracy.}\quad Phi-4-mini (Arm~B) achieved only $91.5\%$ parse rate, meaning 34 of 400 requests returned unparseable JSON. Parse failures were counted as classification errors (no fallback routing applied), so the reported $0.518$ accuracy includes both misclassifications and parse failures. On the 366 parseable responses, Phi-4-mini's classification accuracy is $0.566$---still substantially below the other models' $\geq 0.79$. The $8.5\%$ parse failure rate represents an independent pipeline reliability concern: even if classification accuracy were improved through fine-tuning, the JSON output instability under the frozen contract would require mitigation.
 
-\textbf{Effective sample size.}\quad The RCT uses synthetic traffic generated by repeating the 60 unique corpus cases across $N = 400$ sessions per arm. Because inference is deterministic ($T = 0.0$, greedy decoding), accuracy estimates for repeated prompts within an arm are perfectly correlated. The effective sample size for classification accuracy is therefore $n_{\text{eff}} = 60$ unique cases per arm, not 400. The $N = 400$ figure reflects the number of independent routing \emph{assignments} (via SHA-256 session-ID hashing) but not independent classification \emph{observations}. Latency and cost metrics remain valid at $N = 400$ since each request incurs independent network and compute overhead. All accuracy-based hypothesis tests should be interpreted at $n = 60$.
+\textbf{Effective sample size.}\quad The experiment uses synthetic traffic generated by repeating the 60 unique corpus cases across $N = 400$ sessions per arm. Because inference is deterministic ($T = 0.0$, greedy decoding), accuracy estimates for repeated prompts within an arm are perfectly correlated. The effective sample size for classification accuracy is therefore $n_{\text{eff}} = 60$ unique cases per arm, not 400. The $N = 400$ figure reflects the number of independent routing \emph{assignments} (via SHA-256 session-ID hashing) but not independent classification \emph{observations}. Latency and cost metrics remain valid at $N = 400$ since each request incurs independent network and compute overhead. All accuracy-based hypothesis tests should be interpreted at $n = 60$.
 
 \textbf{Viable region assessment.}\quad Per the pre-registered protocol, an arm is \emph{viable} if accuracy $\geq 0.85$ AND $P95$ latency $\leq 2{,}000$\,ms. No arm meets both criteria: Arm~B fails on accuracy ($0.518$); Arm~C passes latency but fails accuracy ($0.793$); Arm~D fails both ($0.830 < 0.85$, $2{,}295 > 2{,}000$\,ms). This is the central negative finding of the paper: \emph{no current model, including a 671B MoE, reaches the 85\% accuracy threshold for standalone front-door routing on a 6-class taxonomy.}
 
 \textbf{Decision matrix application.}\quad Per Table~\ref{tab:decision}, the observed pattern---DeepSeek leads quality, SLMs lead cost---maps to Row~2: ``SLM + DeepSeek fallback for hard labels.'' The recommended deployment is Qwen-2.5-3B as primary front-door classifier with DeepSeek-V3 invoked selectively for low-confidence or hard-to-classify prompts. This hybrid architecture balances the $\$0$ marginal cost of self-hosted inference against DeepSeek's $4.7$\,pp accuracy premium.
+
+\textbf{Pre-registered endpoints: reported vs.\ deferred.}\quad Of the five pre-registered hypotheses, two are fully testable under the synthetic-traffic design: H5 (routing accuracy, reported above) and H8 (P95 latency, reported in Table~\ref{tab:rct-results}). Three endpoints are partially or fully deferred:
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{H6 (Total Cost):} The pre-registered cost estimand (Eq.~\ref{eq:savings}) includes downstream routing cost, which requires executing the routed model and measuring end-to-end request cost. The synthetic-traffic design does not execute downstream models; Table~\ref{tab:rct-results} reports only marginal front-door cost. H6 remains untested.
+  \item \textbf{H7 (Classification F1):} F1 macro is computable from the per-case predictions at the $n_{\text{eff}} = 60$ level. On the 60 unique cases, F1 macro scores are: Arm~B (Phi-4-mini) $0.460$, Arm~C (Qwen-2.5-3B) $0.767$, Arm~D (DeepSeek-V3) $0.818$. No arm meets the pre-registered $\geq 0.82$ threshold; Arm~D approaches it. Hybrid/agentic-specific F1: B $= 0.67$, C $= 0.90$, D $= 0.95$. Pairwise significance tests are not reported because at $n = 60$ the experiment is underpowered for the pre-registered 3-comparison Holm-Bonferroni correction.
+  \item \textbf{H9 (Compression Quality):} This endpoint requires downstream compression execution at semantic similarity $\geq 0.88$, which was not performed in the synthetic-traffic design. H9 remains untested.
+\end{itemize}
+We acknowledge that the partial reporting of pre-registered endpoints is a limitation. A production-traffic replication would be needed to test H6 and H9 fully.
 
 \begin{finding}[No Viable Standalone Router]
 \label{find:no-viable}
 \emph{No evaluated model---including DeepSeek-V3 (671B MoE, 37B active)---meets the pre-registered viable region ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms $P95$). The 85\% threshold may require fine-tuning, ensemble methods, or taxonomy simplification.}
 \end{finding}
 
-\begin{finding}[Phi-4-mini Regression]
+\begin{finding}[Phi-4-mini Classification Deficit]
 \label{find:phi4-regression}
-\emph{Phi-4-mini achieves only $0.518$ accuracy in the RCT, a $-19.9$\,pp regression from Phi-3.5-mini's harmonized benchmark result ($0.717$), compounded by a $91.5\%$ parse rate ($34/400$ unparseable responses). The regression may reflect an instruction-following improvement that produces verbose JSON output incompatible with the frozen contract, rather than a fundamental classification capability loss---a testable hypothesis via contract-adapted prompting.}
+\emph{Phi-4-mini achieves only $0.518$ accuracy ($0.566$ on parseable responses), $19.9$\,pp below Phi-3.5-mini's harmonized benchmark result ($0.717$), with a $91.5\%$ parse rate ($34/400$ unparseable responses). This cross-study comparison confounds model version with tokenizer, prompt sensitivity, and instruction-tuning changes; the gap should be interpreted descriptively. One testable hypothesis is that the frozen contract's JSON output format is less compatible with Phi-4-mini's generation patterns; contract-adapted prompting could isolate this factor.}
 \end{finding}
 
 \begin{finding}[Qwen-2.5-3B Pareto Dominance]
@@ -482,26 +490,26 @@ D & DeepSeek-V3 & $\mathbf{0.830}$ & $\mathbf{1.000}$ & 1{,}854\,ms & 2{,}295\,m
 \section{Discussion}
 \label{sec:discussion}
 
-The results of the harmonized benchmark and four-arm RCT, viewed together, illuminate several fundamental tensions in the design of production front-door routing systems. The central finding---that no evaluated model meets the 85\% viable region---is itself informative, constraining the design space for production deployments. This section integrates the empirical findings with the broader literature.
+The results of the harmonized benchmark and four-arm randomized experiment, viewed together, illuminate several fundamental tensions in the design of production front-door routing systems. The central finding---that no evaluated model meets the 85\% viable region---is itself informative, constraining the design space for production deployments. This section integrates the empirical findings with the broader literature.
 
-\textbf{The split policy evolves across generations.}\quad The most striking finding across Studies~1 and~2 is the \emph{evolution} of the split policy. In Study~1, the split was dramatic: Phi dominated code/CoT families while Qwen dominated hybrid-agentic (Finding~\ref{find:split}). In Study~2, Qwen-2.5-3B substantially narrows this gap, achieving $\geq 0.70$ on all families including those where its predecessor scored 0.0. This evolution has a concrete implication for the Article~1 dichotomy \citep{johnson2026compress}: Article~1 showed that the optimal \emph{cost strategy} (compress vs.\ route) depends on task type; the harmonized benchmark showed that the optimal \emph{router model} also depends on task type; but the RCT suggests that this recursive dependency may be a \emph{transient} artifact of model immaturity. As SLM classifiers improve, the split policy may converge toward a single-model solution. The convergence hypothesis is particularly important for operational simplicity, since a split policy requires a \emph{meta-router} that first determines which family a prompt belongs to before selecting the appropriate classifier, creating an infinite regress problem. If generational improvement eliminates the need for split routing, the production system simplifies from a two-tier to a single-tier classification architecture, reducing latency, complexity, and maintenance burden---consistent with \citeauthor{sculley2015debt}'s (\citeyear{sculley2015debt}) observation that hidden technical debt in ML systems accumulates fastest at integration boundaries. The evolution also raises a deeper question about whether the split policy reflects genuine architectural specialization or merely uneven training data coverage; resolving this would require controlled experiments with models trained on identical data but with different architectures, an investigation beyond the scope of this paper but methodologically feasible within the Orca-style training paradigm \citep{mukherjee2023orca,mitra2023orca2}.
+\textbf{The split policy evolves across generations.}\quad The most striking finding across Studies~1 and~2 is the \emph{evolution} of the split policy. In Study~1, the split was dramatic: Phi dominated code/CoT families while Qwen dominated hybrid-agentic (Finding~\ref{find:split}). In Study~2, Qwen-2.5-3B substantially narrows this gap, achieving $\geq 0.70$ on all families including those where its predecessor scored 0.0. This observation is suggestive but must be interpreted cautiously: Phi-3.5-mini and Phi-4-mini are different models evaluated in different studies with different comparison sets, so the apparent narrowing of the split policy may partly reflect study-level confounds rather than a genuine generational trend. If the pattern holds under controlled comparison, it would imply that the recursive task-dependency (Article~1 showed optimal \emph{strategy} depends on task type; Study~1 showed optimal \emph{router} depends on task type) may be a transient artifact of model immaturity. If generational improvement eliminates the need for split routing, the production system simplifies from a two-tier to a single-tier classification architecture---consistent with \citeauthor{sculley2015debt}'s (\citeyear{sculley2015debt}) observation that technical debt accumulates fastest at integration boundaries. However, this convergence hypothesis remains speculative and would require controlled experiments with models trained on identical data but with different architectures to resolve \citep{mukherjee2023orca,mitra2023orca2}.
 
-\textbf{Scaling laws for classification.}\quad The accuracy trajectory across the three Study~1 models---Qwen2.5-1.5B (0.400), Phi-3.5-mini (0.717), Qwen-2.5-3B (0.783)---is suggestive of a scaling relationship between parameter count and classification accuracy, though the trajectory confounds parameter count with model family, training data, and architecture improvements. The Phi-4-mini RCT result (0.518 at 3.8B) breaks any simple scaling narrative, demonstrating that parameter count alone is insufficient to predict classification quality. A simple log-linear model fit to the Study~1 data gives
+\textbf{Scaling laws for classification.}\quad The accuracy trajectory across the three Study~1 models---Qwen2.5-1.5B (0.400), Phi-3.5-mini (0.717), Qwen-2.5-3B (0.783)---is suggestive of a scaling relationship between parameter count and classification accuracy, though the trajectory confounds parameter count with model family, training data, and architecture improvements. The Phi-4-mini result (0.518 at 3.8B) breaks any simple scaling narrative, though this cross-study comparison is confounded by model-family and evaluation-context differences. A simple log-linear model fit to the Study~1 data gives
 \begin{equation}
   \text{Acc}(N) \approx \hat{\alpha} \cdot \ln\bigl(N/N_0\bigr), \qquad \hat{\alpha} = 0.81, \quad \hat{N}_0 = 0.87\text{B},
   \label{eq:scaling}
 \end{equation}
-where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) has zero predictive value---three points can fit almost any monotonic function with $R^2 > 0.95$. It is included solely to frame quantitative expectations for the RCT, not to assert a scaling law for classification accuracy.
+where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) has zero predictive value---three points can fit almost any monotonic function with $R^2 > 0.95$. It is included solely to frame quantitative expectations for the experiment, not to assert a scaling law for classification accuracy.
 
-\citet{kaplan2020scaling} established power-law scaling for generative loss; whether classification accuracy follows similar scaling is an open question. \citet{wei2022emergent} documented emergent abilities that appear abruptly above a critical scale, which could explain the dramatic jump from 0.200 to 0.767 within the Qwen family---the 1.5B model may lack a critical capacity for multi-dimensional task taxonomy reasoning that emerges between 1.5B and 3B parameters. However, \citet{schaeffer2024mirage} have argued that apparent emergent abilities may be artifacts of evaluation metric choices, suggesting caution. The Chinchilla scaling laws \citep{hoffmann2022chinchilla} suggest the accuracy improvement from 1.5B to 3B reflects the combined effect of more parameters and more training data. For the practical question of which model to deploy, the combined effect is what matters: the 3B model demonstrably classifies better while maintaining acceptable latency. Our results suggest that a 3B model may be approaching a ``classification ceiling'' for our 6-family taxonomy, given that the remaining errors are concentrated in genuinely ambiguous boundary cases---a diminishing-returns hypothesis that, if confirmed, would validate the economic premise of the front-door architecture by establishing that the optimal classifier size is substantially smaller than the optimal size for downstream generative tasks.
+\citet{kaplan2020scaling} established power-law scaling for generative loss; whether classification accuracy follows similar scaling is an open question. \citet{wei2022emergent} documented emergent abilities that appear abruptly above a critical scale, which could explain the dramatic jump from 0.200 to 0.767 within the Qwen family---the 1.5B model may lack a critical capacity for multi-dimensional task taxonomy reasoning that emerges between 1.5B and 3B parameters. However, \citet{schaeffer2024mirage} have argued that apparent emergent abilities may be artifacts of evaluation metric choices, suggesting caution. The Chinchilla scaling laws \citep{hoffmann2022chinchilla} suggest the accuracy improvement from 1.5B to 3B reflects the combined effect of more parameters and more training data. For the practical question of which model to deploy, the combined effect is what matters: the 3B model demonstrably classifies better while maintaining acceptable latency. These results are consistent with a hypothesis that the remaining errors are concentrated in genuinely ambiguous boundary cases, which would imply diminishing returns to further parameter scaling for this taxonomy. However, with only three data points across two model families, and with the Phi-4-mini counterexample showing that more parameters can produce \emph{worse} classification, this hypothesis is speculative. If confirmed by broader evaluation, it would validate the economic premise of the front-door architecture by establishing that the optimal classifier size is substantially smaller than the optimal size for downstream generative tasks.
 
-\textbf{The accuracy-latency Pareto frontier.}\quad Figure~\ref{fig:scatter} visualizes all evaluated models in accuracy-latency space. No model enters the viable region (accuracy $\geq 0.85$, latency $\leq 2{,}000$\,ms). The RCT tested path~(3)---next-generation models---by including Phi-4-mini, which demonstrated that generational advancement does not guarantee classification improvement. Three remaining paths could push a candidate into the viable region: (1) prompt engineering via chain-of-thought \citep{wei2022chain,wang2023selfconsistency} or tree-of-thought \citep{yao2024treeofthoughts}, at the cost of increased output tokens and latency; (2) fine-tuning via LoRA \citep{hu2022lora} on a classification-specific dataset; and (3) taxonomy revision---either simplification (merging boundary-ambiguous families like \texttt{hybrid/generative} into neighboring categories) or expansion (adding a seventh label for expert reasoning, motivated by the error corridor analysis in Appendix~\ref{app:runids} showing that code$\to$hybrid and hybrid$\to$CoT confusions account for 10 of 14 Qwen-3B errors). A fourth path---inference infrastructure optimization via FlashAttention \citep{dao2022flashattention,dao2023flashattention2} or disaggregated serving \citep{zhong2024distserve}---could reduce latency without changing accuracy. Notably, Figure~\ref{fig:scatter} shows that Phi-4-mini achieves $977$\,ms latency versus Phi-3.5-mini's $5{,}772$\,ms ($5.9\times$ improvement from the generational jump), demonstrating that the architecture-level latency gains are real even when classification accuracy regresses.
+\textbf{The accuracy-latency Pareto frontier.}\quad Figure~\ref{fig:scatter} visualizes all evaluated models in accuracy-latency space. No model enters the viable region (accuracy $\geq 0.85$, latency $\leq 2{,}000$\,ms). The experiment tested path~(3)---next-generation models---by including Phi-4-mini, which showed that generational advancement does not guarantee classification improvement (though this comparison is confounded; see Finding~\ref{find:phi4-regression}). Three remaining paths could push a candidate into the viable region: (1) prompt engineering via chain-of-thought \citep{wei2022chain,wang2023selfconsistency} or tree-of-thought \citep{yao2024treeofthoughts}, at the cost of increased output tokens and latency; (2) fine-tuning via LoRA \citep{hu2022lora} on a classification-specific dataset; and (3) taxonomy revision---either simplification (merging boundary-ambiguous families like \texttt{hybrid/generative} into neighboring categories) or expansion (adding a seventh label for expert reasoning, motivated by the error corridor analysis in Appendix~\ref{app:runids} showing that code$\to$hybrid ($n = 4$), hybrid$\to$CoT ($n = 3$), and hybrid$\to$code ($n = 2$) confusions account for 9 of 13 Qwen-3B errors). A fourth path---inference infrastructure optimization via FlashAttention \citep{dao2022flashattention,dao2023flashattention2} or disaggregated serving \citep{zhong2024distserve}---could reduce latency without changing accuracy. Notably, Figure~\ref{fig:scatter} shows that Phi-4-mini achieves $977$\,ms latency versus Phi-3.5-mini's $5{,}772$\,ms ($5.9\times$ improvement from the generational jump), demonstrating that the architecture-level latency gains are real even when classification accuracy regresses.
 
-\textbf{Connection to provider-dependent dynamics.}\quad Articles~4--5 \citep{johnson2026greenai,johnson2026benchmark} documented that DeepSeek-Chat exhibits compression sensitivity CS $= -54.1$ ($38\times$ output explosion). The RCT included DeepSeek-V3 (Arm~D) with the same architectural lineage. The classification task differs from generative tasks in that the output budget is tightly constrained (\texttt{max\_new\_tokens}=128), which appears to mitigate explosion risk---DeepSeek-V3 achieved perfect parse rate (1.000) and the highest classification accuracy (0.830). The MoE architecture \citep{shazeer2017moe,fedus2022switch,dai2024deepseek} appears well-suited to classification: despite activating only 37B of 671B parameters per token, DeepSeek-V3's internal routing may be selecting expert subnetworks that are effective for the intent-understanding required by classification. However, this quality comes at the cost of API dependency, network latency ($P95 = 2{,}295$\,ms, exceeding the 2,000\,ms gate), and non-zero per-request cost (\$0.034/400 requests).
+\textbf{Connection to provider-dependent dynamics.}\quad Articles~4--5 \citep{johnson2026greenai,johnson2026benchmark} documented that DeepSeek-Chat exhibits compression sensitivity CS $= -54.1$ ($38\times$ output explosion). The experiment included DeepSeek-V3 (Arm~D) with the same architectural lineage. The classification task differs from generative tasks in that the output budget is tightly constrained (\texttt{max\_new\_tokens}=128), which appears to mitigate explosion risk---DeepSeek-V3 achieved perfect parse rate (1.000) and the highest classification accuracy (0.830). The MoE architecture \citep{shazeer2017moe,fedus2022switch,dai2024deepseek} appears well-suited to classification: despite activating only 37B of 671B parameters per token, DeepSeek-V3's internal routing may be selecting expert subnetworks that are effective for the intent-understanding required by classification. However, this quality comes at the cost of API dependency, network latency ($P95 = 2{,}295$\,ms, exceeding the 2,000\,ms gate), and non-zero per-request cost (\$0.034/400 requests).
 
-\textbf{The tokenizer-awareness tension.}\quad Article~7 \citep{johnson2026promptlang} established that prompt design should account for the target model's tokenizer. The Study~2 design creates a tension with this principle: the classification system prompt is frozen across all three SLM backends, each with a different tokenizer (Phi uses a Llama-derived tokenizer, Qwen uses a custom BPE tokenizer \citep{sennrich2016subword}, DeepSeek uses SentencePiece \citep{kudo2018sentencepiece}). We chose the frozen-prompt design to isolate model capability from prompt engineering and to reflect the practical deployment scenario where a single prompt is maintained for all backends. The RCT did reveal quality differences (Phi-4-mini at 0.518 vs.\ Qwen-2.5-3B at 0.793), suggesting that a follow-up study should assess how much of the gap is attributable to tokenizer mismatch, given that even small prompt variations can produce large accuracy differences \citep{zhou2023prompt,khattab2024dspy}.
+\textbf{The tokenizer-awareness tension.}\quad Article~7 \citep{johnson2026promptlang} established that prompt design should account for the target model's tokenizer. The Study~2 design creates a tension with this principle: the classification system prompt is frozen across all three SLM backends, each with a different tokenizer (Phi uses a Llama-derived tokenizer, Qwen uses a custom BPE tokenizer \citep{sennrich2016subword}, DeepSeek uses SentencePiece \citep{kudo2018sentencepiece}). We chose the frozen-prompt design to isolate model capability from prompt engineering and to reflect the practical deployment scenario where a single prompt is maintained for all backends. The experiment did reveal quality differences (Phi-4-mini at 0.518 vs.\ Qwen-2.5-3B at 0.793), suggesting that a follow-up study should assess how much of the gap is attributable to tokenizer mismatch, given that even small prompt variations can produce large accuracy differences \citep{zhou2023prompt,khattab2024dspy}.
 
-\textbf{Error corridor analysis.}\quad The per-case error analysis (Appendix~\ref{app:runids}, Table~\ref{tab:confusion-errors}) reveals that 9 of 13 Qwen-3B misclassifications concentrate in three corridors: code$\to$hybrid ($n = 4$), hybrid$\to$CoT ($n = 3$), and hybrid$\to$code ($n = 2$). The code--hybrid boundary is the primary confusion axis, where prompts combining structured code requests with open-ended generation create genuine taxonomic ambiguity. This suggests that the 6--8\,pp gap to the 85\% viable threshold may be addressable through targeted taxonomy refinement at the code--hybrid boundary rather than wholesale model scaling.
+\textbf{Error corridor analysis.}\quad The per-case error analysis (Appendix~\ref{app:runids}, Table~\ref{tab:confusion-errors}) reveals that 9 of 13 Qwen-3B misclassifications concentrate in three corridors: code$\to$hybrid ($n = 4$), hybrid$\to$CoT ($n = 3$), and hybrid$\to$code ($n = 2$). The code--hybrid boundary is the primary confusion axis, where prompts combining structured code requests with open-ended generation create genuine taxonomic ambiguity. However, because the corpus was labeled by a single annotator without adjudication (see Threats to Validity), some of these ``errors'' may reflect label-boundary ambiguity rather than model failures. Subject to that caveat, the pattern suggests that targeted taxonomy refinement at the code--hybrid boundary---rather than wholesale model scaling---may be the most efficient path to closing the 6--8\,pp gap.
 
 \textbf{Implications for production architecture.}\quad The sub-2-second latency achieved by all self-hosted models in both studies demonstrates that SLM-based front-door classification is compatible with production latency requirements, adding minimal overhead relative to downstream generative inference (typically 5--30 seconds). The breadth advantage of Qwen-2.5-3B (Finding~\ref{find:taxonomy}) suggests that for production routing, a single generalist classifier is preferable to a committee of specialists, even if individual specialists achieve higher peak accuracy. The confidence overconfidence pattern argues against using model-reported confidence as a fallback trigger; instead, production systems should rely on external quality signals such as output structural validity or downstream task completion rate \citep{klaise2021alibi}. These architectural considerations intersect with the broader MLOps literature on model management and technical debt \citep{sculley2015debt,kreuzberger2023mlops}. The ideal front-door classifier would be robust to downstream model changes, requiring updates only when the task taxonomy itself evolves; our frozen-prompt, frozen-contract design approximates this ideal, but the extent to which it generalizes to new model families remains open.
 
@@ -511,13 +519,15 @@ where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) has zero pr
 \section{Threats to Validity}
 \label{sec:threats}
 
-\textbf{Internal validity.}\quad The harmonized benchmark (Study~1) eliminates the cross-study confounds present in v7 of this paper: all three models were evaluated on the same hardware (Azure T4), same serving stack (vLLM 0.17.1), same corpus (SHA \texttt{dac3aac5}), and same quantization (bitsandbytes 4-bit NF4), with exclusive GPU allocation per model. The RCT (Study~2) uses synthetic traffic from the same corpus rather than production traffic, which may not capture the full distribution of prompt characteristics. Arms B and C were served sequentially on the same GPU (not simultaneously), which eliminates resource contention confounds but means the RCT does not test concurrent multi-model serving.
+\textbf{Internal validity.}\quad The harmonized benchmark (Study~1) eliminates the cross-study confounds present in v7 of this paper: all three models were evaluated on the same hardware (Azure T4), same serving stack (vLLM 0.17.1), same corpus (SHA \texttt{dac3aac5}), and same quantization (bitsandbytes 4-bit NF4), with exclusive GPU allocation per model. Study~2 uses synthetic traffic from the same corpus rather than production traffic, which may not capture the full distribution of prompt characteristics. Arms B and C were served sequentially on the same GPU (not simultaneously), which eliminates resource contention confounds but means the experiment does not test concurrent multi-model serving.
 
-\textbf{External validity.}\quad The 60-case corpus represents a structured sample from six pre-defined task families. Production traffic may have different family distributions, prompt lengths, and ambiguity characteristics. The RCT uses synthetic traffic from the same 60-case corpus, not production traffic; its primary value is as a controlled comparison across arms rather than a production-traffic validation. The 6-family taxonomy is specific to the \plexor{} routing system; other architectures using different taxonomies could produce different rankings. All results use 4-bit NF4 quantization; full-precision results may differ.
+\textbf{External validity.}\quad The 60-case corpus represents a structured sample from six pre-defined task families. Production traffic may have different family distributions, prompt lengths, and ambiguity characteristics. Study~2 uses synthetic traffic from the same 60-case corpus, not production traffic; its primary value is as a controlled comparison across arms rather than a production-traffic validation. The 6-family taxonomy is specific to the \plexor{} routing system; other architectures using different taxonomies could produce different rankings. All results use 4-bit NF4 quantization; full-precision results may differ.
 
-\textbf{Cross-study consistency.}\quad Qwen-2.5-3B achieves $0.783$ accuracy in the harmonized benchmark (Study~1, 60 unique cases) and $0.793$ in the RCT (Study~2, 400 sessions from the same corpus). The $\sim$1\,pp difference is within sampling variability and confirms cross-study reproducibility of the classification results on identical infrastructure.
+\textbf{Cross-study consistency.}\quad Qwen-2.5-3B achieves $0.783$ accuracy in the harmonized benchmark (Study~1, 60 unique cases) and $0.793$ in the experiment (Study~2, 400 sessions from the same corpus). The $\sim$1\,pp difference is within sampling variability and confirms cross-study reproducibility of the classification results on identical infrastructure.
 
 \textbf{Construct validity.}\quad Exact-match label accuracy is the strictest possible metric; partial credit might favor different models, but production routing applies discrete policies per label. The model's self-reported confidence score is not calibrated and should not be interpreted as a probability. All results depend on the specific frozen system prompt, output budget, and quantization configuration.
+
+\textbf{Taxonomy validity.}\quad The entire evaluation depends on a 6-label taxonomy with exact-match scoring. The 60-case corpus was constructed and labeled by a single annotator (the first author) without independent adjudication, and no inter-annotator agreement statistics are available. The appendix error-corridor analysis (Table~\ref{tab:confusion-errors}) shows that the code--hybrid boundary is genuinely ambiguous: prompts combining structured code requests with open-ended generation could defensibly receive either label. Without a multi-annotator protocol, some apparent model ``errors'' may reflect label-boundary ambiguity rather than model failures. Future work should establish inter-annotator agreement (e.g., Cohen's $\kappa$) on the 60-case corpus with at least two independent annotators, and report per-family disagreement rates. Until such validation is performed, accuracy differences of $\leq$5\,pp near the code--hybrid boundary should be interpreted with caution.
 
 % ════════════════════════════════════════════════════════════════════
 % 9. REPRODUCIBILITY
@@ -525,7 +535,7 @@ where $N$ is the parameter count in billions. The fit ($R^2 = 0.97$) has zero pr
 \section{Reproducibility}
 \label{sec:repro}
 
-All run IDs, corpus hashes, and software versions are documented in Appendix~\ref{app:runids}. Study~1 (harmonized benchmark) artifacts include the corpus SHA \texttt{dac3aac5\ldots}, Azure Standard\_NC8as\_T4\_v3 execution environment, and vLLM 0.17.1 serving stack. Study~2 (four-arm RCT) artifacts include $N = 400$ per arm with SHA-256(\texttt{session\_id}) $\bmod 4$ assignment, the same corpus SHA, and pre-registered analysis scripts. To reproduce, provision the identical GPU class, clone the repository at the tagged commit, verify corpus SHA, execute \texttt{benchmark\_openweights.py}, and compare per-case predictions against archived ground truth. The MLflow tracking server \citep{zaharia2018mlflow} provides complete parameter, metric, and artifact provenance.
+All software versions, corpus hashes, and execution metadata are documented in Appendix~\ref{app:runids} (Tables~\ref{tab:study1-runids}--\ref{tab:study2-runids}). Study~1 artifacts: corpus SHA-256 prefix \texttt{dac3aac5}, Azure Standard\_NC8as\_T4\_v3, vLLM 0.17.1, bitsandbytes 4-bit NF4. Study~2 artifacts: $N = 400$ per arm, SHA-256(\texttt{session\_id}) $\bmod 4$ randomization, same corpus SHA. The repository tag \texttt{rct-baseline-2026-03-12} marks the pre-registration snapshot. To reproduce: provision the identical GPU class, clone at the tagged commit, verify corpus SHA via \texttt{sha256sum data/progressive\_test\_cases\_v2\_60.jsonl}, execute \texttt{scripts/benchmark\_openweights.py} (Study~1) or \texttt{scripts/rct\_synthetic\_runner.py} (Study~2), and compare per-case JSON predictions against the archived ground truth. The MLflow tracking server \citep{zaharia2018mlflow} provides parameter, metric, and artifact provenance for each run.
 
 % ════════════════════════════════════════════════════════════════════
 % 10. CONCLUSION
@@ -533,7 +543,7 @@ All run IDs, corpus hashes, and software versions are documented in Appendix~\re
 \section{Conclusion}
 \label{sec:conclusion}
 
-This paper reports two complementary studies addressing the model-selection problem for production front-door routing. Study~1 (Harmonized Offline Benchmark) established, on identical hardware with exclusive GPU allocation, that Qwen-2.5-3B and Phi-3.5-mini achieve statistically indistinguishable accuracy ($0.783$ vs.\ $0.717$, $p = 0.503$) but Qwen-2.5-3B is $5.3\times$ faster, making it the Pareto-dominant offline candidate. The breadth-over-depth finding---Qwen-2.5-3B is the only model with non-zero accuracy on all six families---inverts the typical evaluation paradigm where peak performance dominates. Study~2 (Four-Arm RCT, $N = 400$/arm) tested these offline findings under controlled synthetic traffic conditions and extended the evaluation to next-generation models. The central negative finding is that \emph{no evaluated model meets the pre-registered viable region} ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). DeepSeek-V3 (671B MoE) achieves the highest accuracy ($0.830$) but fails both gates. Per the pre-registered decision matrix, the recommended deployment is Qwen-2.5-3B as primary front-door with DeepSeek-V3 fallback for hard classifications.
+This paper reports two complementary studies addressing the model-selection problem for production front-door routing. Study~1 (Harmonized Offline Benchmark) established, on identical hardware with exclusive GPU allocation, that Qwen-2.5-3B and Phi-3.5-mini achieve statistically indistinguishable accuracy ($0.783$ vs.\ $0.717$, $p = 0.503$) but Qwen-2.5-3B is $5.3\times$ faster, making it the Pareto-dominant offline candidate. The breadth-over-depth finding---Qwen-2.5-3B is the only model with non-zero accuracy on all six families---inverts the typical evaluation paradigm where peak performance dominates. Study~2 (Four-Arm Randomized Experiment, $N = 400$/arm, $n_{\text{eff}} = 60$ for accuracy) tested these offline findings under controlled synthetic traffic conditions and extended the evaluation to next-generation models. The central negative finding is that \emph{no evaluated model meets the pre-registered viable region} ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). DeepSeek-V3 (671B MoE) achieves the highest accuracy ($0.830$) but fails both gates. Per the pre-registered decision matrix, the recommended deployment is Qwen-2.5-3B as primary front-door with DeepSeek-V3 fallback for hard classifications.
 
 Together, these studies demonstrate an end-to-end methodology for evidence-based model selection: harmonized offline benchmarking followed by pre-registered production experimentation. The broader implication for the \taac{} research program is that the Article~1 dichotomy (compress code, route CoT) extends recursively---the model that implements the routing decision is itself subject to task-dependent quality-latency tradeoffs. The 85\% accuracy threshold remains unmet, suggesting three paths forward: (1)~fine-tuning via LoRA on classification-specific data; (2)~taxonomy simplification (reducing from 6 to 4 families by merging boundary-ambiguous categories); or (3)~ensemble methods combining SLM classification with LLM fallback.
 
@@ -551,7 +561,7 @@ This work was supported in part by a Cohere Labs research grant, which funded co
 % ════════════════════════════════════════════════════════════════════
 \section*{Use of AI Assistance}
 
-This paper was prepared with AI assistance (Claude, Anthropic) for writing, code generation, and \LaTeX{} formatting. The authors are solely responsible for all scientific content, experimental design, and conclusions.
+This paper was prepared with AI assistance (Claude, Anthropic) for writing, code generation, benchmark script development, and \LaTeX{} formatting. AI-generated scripts were reviewed line-by-line by the first author before execution; all numerical results in tables were verified against raw JSON output files; and statistical claims were cross-checked by the first author using independent calculations. The authors are solely responsible for all scientific content, experimental design, interpretation, and conclusions.
 
 % ════════════════════════════════════════════════════════════════════
 % ETHICS STATEMENT
@@ -572,7 +582,7 @@ W.J.\ is affiliated with Plexor Labs, which develops the \plexor{} system. C.L.\
 % ════════════════════════════════════════════════════════════════════
 \section*{Data and Code Availability}
 
-The experimental corpus, all analysis scripts, and raw results are available at the project repository: \url{https://github.com/micoverde/plexor-slm-frontdoor-rct}. The pre-registration protocol for Study~2 is deposited in the experiment protocol document committed before RCT execution.
+The experimental corpus, all analysis scripts, and raw results are available at the project repository: \url{https://github.com/micoverde/plexor-slm-frontdoor-rct}. The pre-registration protocol for Study~2 is deposited in the experiment protocol document committed before experiment execution.
 
 % ════════════════════════════════════════════════════════════════════
 % REFERENCES
@@ -610,11 +620,11 @@ Date & 2026-03-15 \\
 \end{tabular}
 \end{table}
 
-\subsection{Study~2: Four-Arm RCT}
+\subsection{Study~2: Four-Arm Randomized Experiment}
 
 \begin{table}[htbp]
 \centering
-\caption{Study~2 RCT execution details.}
+\caption{Study~2 execution details.}
 \label{tab:study2-runids}
 \begin{tabular}{ll}
 \toprule
@@ -663,17 +673,17 @@ PV2-059 & hybrid/generative & CoT/complex & hybrid $\to$ CoT \\
 \subsection{Study~2: Pre-Registration Artifacts}
 \label{app:prereg}
 
-Study~2 pre-registration includes the design document (this paper, \S\ref{sec:rct-design}), analysis scripts, decision matrix (Table~\ref{tab:decision}), and hypothesis specifications (H5--H9), all committed to the repository before RCT execution. Table~\ref{tab:prereg-artifacts} enumerates the specific files, their locations, and content hashes.
+Study~2 pre-registration includes the design document (this paper, \S\ref{sec:rct-design}), analysis scripts, decision matrix (Table~\ref{tab:decision}), and hypothesis specifications (H5--H9), all committed to the repository before experiment execution. Table~\ref{tab:prereg-artifacts} enumerates the specific files, their locations, and content hashes.
 
 \begin{table}[htbp]
 \centering
-\caption{Pre-registered artifacts for Study~2, committed before RCT execution.}
+\caption{Pre-registered artifacts for Study~2, committed before experiment execution.}
 \label{tab:prereg-artifacts}
 \begin{tabular}{lp{5.5cm}l}
 \toprule
 Artifact & File Path & Purpose \\
 \midrule
-RCT design & \texttt{paper/main.tex} (\S\ref{sec:rct-design}) & Protocol specification \\
+Experiment design & \texttt{paper/main.tex} (\S\ref{sec:rct-design}) & Protocol specification \\
 Analysis script & \texttt{scripts/ab-test/rct\_cross\_arm\_analysis.py} & Endpoint analysis \\
 Decision matrix & Table~\ref{tab:decision} (this paper) & Outcome $\to$ action map \\
 Hypothesis specs & H5--H9 (\S\ref{sec:hypotheses}) & Testable predictions \\
