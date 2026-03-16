@@ -1,0 +1,14 @@
+{
+  "n_interim": 200,
+  "n_final": 400,
+  "information_fraction": 0.5,
+  "arm_accuracies": {
+    "B": {
+      "correct": 106,
+      "total": 200,
+      "accuracy": 0.53
+    }
+  },
+  "obf_boundary_alpha": 0.005575,
+  "obf_note": "Arm-dropping criterion: dominated on BOTH cost AND quality at p < 0.001 (pre-registered)"
+}

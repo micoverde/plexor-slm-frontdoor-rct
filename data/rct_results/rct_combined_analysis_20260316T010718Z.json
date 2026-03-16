@@ -1,0 +1,84 @@
+{
+  "timestamp": "20260316T010718Z",
+  "corpus_sha256": "dac3aac591526814b9cd1e54b1d8d79d4af0c2e8eaf33573fa20a2c8f12aeb57",
+  "summary": {
+    "A": {
+      "n": 400,
+      "type": "control"
+    },
+    "B": {
+      "n": 400,
+      "accuracy": 0.5175,
+      "parse_rate": 0.915,
+      "avg_latency_ms": 1123.54,
+      "median_latency_ms": 977.07,
+      "p95_latency_ms": 1541.46,
+      "total_cost_usd": 0.0,
+      "family_accuracy": {
+        "CoT/complex": 0.3846,
+        "CoT/simple": 0.9483,
+        "code/complex": 0.28,
+        "code/simple": 1.0,
+        "hybrid/agentic": 0.5405,
+        "hybrid/generative": 0.1143
+      }
+    },
+    "C": {
+      "n": 400,
+      "accuracy": 0.7925,
+      "parse_rate": 1.0,
+      "avg_latency_ms": 989.24,
+      "median_latency_ms": 987.97,
+      "p95_latency_ms": 1169.98,
+      "total_cost_usd": 0.0,
+      "family_accuracy": {
+        "CoT/complex": 0.9219,
+        "CoT/simple": 0.9104,
+        "code/complex": 0.75,
+        "code/simple": 0.6286,
+        "hybrid/agentic": 0.9118,
+        "hybrid/generative": 0.6479
+      }
+    },
+    "D": {
+      "n": 400,
+      "accuracy": 0.83,
+      "parse_rate": 1.0,
+      "avg_latency_ms": 1894.71,
+      "median_latency_ms": 1853.99,
+      "p95_latency_ms": 2295.17,
+      "total_cost_usd": 0.033932,
+      "family_accuracy": {
+        "CoT/complex": 0.9041,
+        "CoT/simple": 0.7027,
+        "code/complex": 0.8136,
+        "code/simple": 0.8904,
+        "hybrid/agentic": 1.0,
+        "hybrid/generative": 0.6721
+      }
+    }
+  },
+  "viable_region": {
+    "B": {
+      "accuracy_pass": false,
+      "latency_pass": true,
+      "viable": false
+    },
+    "C": {
+      "accuracy_pass": false,
+      "latency_pass": true,
+      "viable": false
+    },
+    "D": {
+      "accuracy_pass": false,
+      "latency_pass": false,
+      "viable": false
+    }
+  },
+  "design": {
+    "n_per_arm": 400,
+    "correction": "Holm-Bonferroni",
+    "latency_gate_ms": 2000,
+    "accuracy_gate": 0.85
+  }
+}
