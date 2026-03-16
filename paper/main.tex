@@ -195,7 +195,9 @@ A front-door classifier is a function
 \end{equation}
 mapping each prompt $p$ to a predicted label $\hat{\ell} = f(p)_{\text{label}} \in \mathcal{L}$ and a self-reported confidence $c = f(p)_{\text{conf}} \in [0,1]$. The downstream routing table $R: \mathcal{L} \to \mathcal{M} \times \Theta$ maps each label to a (model, compression-policy) pair, making the classification decision the single point of control for the entire inference pipeline.
 
-\textbf{Experimental contract.}\quad The contract identifier is \texttt{jsonsafe\_cls\_tokens\_128}. The corpus is \texttt{progressive\_test\_cases\_v2\_60.jsonl} (60 prompts, 6 families $\times$ 10 cases each; SHA-256: \texttt{dac3aac5\ldots}). Decoding: \texttt{max\_new\_tokens}=128, $T = 0.0$ (greedy). Quantization is 4-bit NF4 via bitsandbytes for all three models. Fairness invariants require sequential execution with exclusive GPU allocation, the same serving stack, and the same corpus SHA across all runs. The three models span the SLM design space: Phi-3.5-mini-instruct (3.8B, dense, Microsoft) optimizes for instruction-following quality; Qwen2.5-1.5B-Instruct (1.5B, dense, Alibaba) optimizes for minimal footprint; Qwen-2.5-3B-Instruct (3.0B, dense, Alibaba) \citep{yang2024qwen25} tests whether a generation jump within the Qwen family resolves the accuracy deficit.
+\textbf{Experimental contract.}\quad The contract identifier is \texttt{jsonsafe\_cls\_tokens\_128}. The corpus is \texttt{progressive\_test\_\allowbreak{}cases\_v2\_60.jsonl} (60 prompts, 6 families $\times$ 10 cases each; SHA-256: \texttt{dac3aac5\ldots}). Decoding: \texttt{max\_new\_tokens}=128, $T = 0.0$ (greedy). Quantization is 4-bit NF4 via bitsandbytes for all three models. Fairness invariants require sequential execution with exclusive GPU allocation, the same serving stack, and the same corpus SHA across all runs.
+
+The three models span the SLM design space: Phi-3.5-mini-instruct (3.8B, dense, Microsoft) optimizes for instruction-following quality; Qwen2.5-1.5B-Instruct (1.5B, dense, Alibaba) optimizes for minimal footprint; Qwen-2.5-3B-Instruct (3.0B, dense, Alibaba) \citep{yang2024qwen25} tests whether a generation jump within the Qwen family resolves the accuracy deficit.
 
 \textbf{Classification system prompt.}\quad All three models receive an identical, frozen classification system prompt:
 
@@ -303,41 +305,35 @@ Family & Phi-3.5-mini & Qwen2.5-1.5B & Qwen-2.5-3B & Best Model \\
 ]
 % Viable region (shaded green)
 \fill[green!15] (axis cs:0,0.85) rectangle (axis cs:2000,1.05);
-\node[anchor=north west, font=\footnotesize] at (axis cs:50,1.03) {\textbf{Viable region}};
+\node[anchor=south west, font=\scriptsize\bfseries, green!50!black] at (axis cs:50,0.86) {Viable};
 
 % Production threshold line
 \draw[dashed, red!70!black, thick] (axis cs:0,0.85) -- (axis cs:6500,0.85);
-\node[anchor=south west, font=\footnotesize, red!70!black] at (axis cs:2200,0.855) {Production threshold (0.85)};
+\node[anchor=south west, font=\scriptsize, red!70!black] at (axis cs:3800,0.855) {Accuracy = 0.85};
 
 % Latency SLA line
 \draw[dashed, blue!70!black, thick] (axis cs:2000,0) -- (axis cs:2000,1.05);
-\node[anchor=south, font=\footnotesize, blue!70!black, rotate=90] at (axis cs:2100,0.35) {Latency SLA (2,000\,ms)};
+\node[anchor=south west, font=\scriptsize, blue!70!black, rotate=90] at (axis cs:2050,0.10) {P95 $\leq$ 2{,}000\,ms};
 
 % Study 1 (Harmonized Benchmark) — filled markers
-% Qwen-1.5B (red circle)
 \addplot[only marks, mark=*, mark size=4pt, red!80!black] coordinates {(793,0.400)};
-\node[anchor=south west, font=\footnotesize] at (axis cs:850,0.41) {Qwen-1.5B};
+\node[anchor=north west, font=\scriptsize] at (axis cs:850,0.39) {Qwen-1.5B};
 
-% Qwen-3B (teal triangle)
 \addplot[only marks, mark=triangle*, mark size=5pt, teal!80!black] coordinates {(1088,0.783)};
-\node[anchor=south east, font=\footnotesize] at (axis cs:1030,0.79) {Qwen-3B};
+\node[anchor=south west, font=\scriptsize] at (axis cs:1150,0.785) {Qwen-3B};
 
-% Phi-3.5-mini (blue square)
 \addplot[only marks, mark=square*, mark size=4pt, blue!80!black] coordinates {(5772,0.717)};
-\node[anchor=south west, font=\footnotesize] at (axis cs:5850,0.72) {Phi-3.5};
+\node[anchor=south west, font=\scriptsize] at (axis cs:5850,0.72) {Phi-3.5};
 
 % Study 2 (RCT) — open markers
-% Phi-4-mini RCT (blue open square)
 \addplot[only marks, mark=square, mark size=4pt, blue!80!black] coordinates {(977,0.518)};
-\node[anchor=north east, font=\footnotesize] at (axis cs:920,0.51) {Phi-4$^{\text{RCT}}$};
+\node[anchor=north west, font=\scriptsize] at (axis cs:500,0.50) {Phi-4$^{\text{R}}$};
 
-% Qwen-3B RCT (teal open triangle)
 \addplot[only marks, mark=triangle, mark size=5pt, teal!80!black] coordinates {(988,0.793)};
-\node[anchor=north west, font=\footnotesize] at (axis cs:1040,0.74) {Qwen-3B$^{\text{RCT}}$};
+\node[anchor=south east, font=\scriptsize] at (axis cs:930,0.80) {3B$^{\text{R}}$};
 
-% DeepSeek-V3 RCT (purple diamond)
 \addplot[only marks, mark=diamond*, mark size=5pt, purple!80!black] coordinates {(1854,0.830)};
-\node[anchor=south west, font=\footnotesize] at (axis cs:1910,0.835) {DeepSeek-V3$^{\text{RCT}}$};
+\node[anchor=south east, font=\scriptsize] at (axis cs:1800,0.835) {DS-V3$^{\text{R}}$};
 
 \end{axis}
 \end{tikzpicture}
@@ -555,21 +551,21 @@ This work was supported in part by a Cohere Labs research grant, which funded co
 % ════════════════════════════════════════════════════════════════════
 \section*{Use of AI Assistance}
 
-This paper was prepared with the assistance of Claude (Anthropic, Claude Opus 4.6 and Claude Sonnet 4.6) for writing, editing, statistical reporting, code generation, and \LaTeX{} formatting. Specifically, AI assistance was used for: (1) drafting and editing prose throughout all sections; (2) generating the harmonized benchmark and RCT execution scripts; (3) formatting tables, TikZ figures, and references; (4) reviewing the statistical analysis plan for methodological soundness; and (5) executing the Study~1 benchmark and Study~2 RCT under author supervision. The authors are solely responsible for all scientific content, experimental design, hypothesis formulation, data collection, analysis interpretation, and conclusions. All empirical claims are based on actual experimental data collected and analyzed by the authors. The use of AI assistance does not diminish the authors' accountability for the accuracy and integrity of the reported findings.
+This paper was prepared with AI assistance (Claude, Anthropic) for writing, code generation, and \LaTeX{} formatting. The authors are solely responsible for all scientific content, experimental design, and conclusions.
 
 % ════════════════════════════════════════════════════════════════════
 % ETHICS STATEMENT
 % ════════════════════════════════════════════════════════════════════
 \section*{Ethics Statement}
 
-This work aims to reduce the computational cost and environmental impact of LLM inference in production systems through intelligent model routing \citep{schwartz2020green,strubell2019energy,patterson2021carbon,luccioni2023bloom}. The experimental corpus consists of synthetic classification test cases and contains no personally identifiable information, protected health information, or sensitive personal data. All task instructions were generated by automated orchestration agents within the authors' own deployment environments. We do not foresee negative societal impacts from this research. The routing techniques evaluated herein are designed to reduce resource consumption and costs, contributing to more sustainable AI deployment practices.
+The experimental corpus consists of synthetic classification test cases and contains no personally identifiable information. We do not foresee negative societal impacts from this research.
 
 % ════════════════════════════════════════════════════════════════════
 % COMPETING INTERESTS
 % ════════════════════════════════════════════════════════════════════
 \section*{Declaration of Competing Interests}
 
-The authors are affiliated with Bona Opera Studios, which develops the \plexor{} optimization system described herein. The authors acknowledge that favorable experimental results---particularly evidence that SLM-based routing reduces inference costs---could benefit the commercial viability of \plexor{}. To mitigate potential bias: (1) all hypotheses and analysis plans were pre-registered before data collection; (2) the corpus hash and pre-registration protocol were committed to a public GitHub repository before experiment execution; (3) all results, including null and unfavorable findings (e.g., the Phi-4-mini generational regression in Finding~\ref{find:phi4-regression} and the viable-region negative result in Finding~\ref{find:no-viable}), are reported transparently; and (4) all analysis code is open-source and available for independent verification. The authors declare no other competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+W.J.\ is affiliated with Plexor Labs, which develops the \plexor{} system. C.L.\ is affiliated with Project Autobots. All hypotheses were pre-registered before data collection; all results---including negative findings---are reported transparently. All analysis code is open-source.
 
 % ════════════════════════════════════════════════════════════════════
 % DATA AVAILABILITY
