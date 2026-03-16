@@ -1,0 +1,70 @@
+{
+  "models": {
+    "phi-3.5-mini": {
+      "accuracy": 0.7166666666666667,
+      "parse_rate": 0.9833333333333333,
+      "median_latency_ms": 5771.91,
+      "p95_latency_ms": 6357.11,
+      "family_accuracy": {
+        "CoT/complex": 1.0,
+        "CoT/simple": 0.8,
+        "code/complex": 1.0,
+        "code/simple": 0.8,
+        "hybrid/agentic": 0.5,
+        "hybrid/generative": 0.2
+      }
+    },
+    "qwen2.5-1.5b": {
+      "accuracy": 0.4,
+      "parse_rate": 0.9666666666666667,
+      "median_latency_ms": 792.58,
+      "p95_latency_ms": 4635.53,
+      "family_accuracy": {
+        "CoT/complex": 0.0,
+        "CoT/simple": 0.0,
+        "code/complex": 0.5,
+        "code/simple": 0.9,
+        "hybrid/agentic": 1.0,
+        "hybrid/generative": 0.0
+      }
+    },
+    "qwen2.5-3b": {
+      "accuracy": 0.7833333333333333,
+      "parse_rate": 1.0,
+      "median_latency_ms": 1087.54,
+      "p95_latency_ms": 1554.2,
+      "family_accuracy": {
+        "CoT/complex": 0.9,
+        "CoT/simple": 0.9,
+        "code/complex": 0.7,
+        "code/simple": 0.7,
+        "hybrid/agentic": 0.9,
+        "hybrid/generative": 0.6
+      }
+    }
+  },
+  "corpus_sha256": "dac3aac591526814b9cd1e54b1d8d79d4af0c2e8eaf33573fa20a2c8f12aeb57",
+  "pairwise_mcnemar": [
+    {
+      "a": "phi-3.5-mini",
+      "b": "qwen2.5-1.5b",
+      "b_count": 25,
+      "c_count": 6,
+      "p": 0.000878
+    },
+    {
+      "a": "phi-3.5-mini",
+      "b": "qwen2.5-3b",
+      "b_count": 8,
+      "c_count": 12,
+      "p": 0.503445
+    },
+    {
+      "a": "qwen2.5-1.5b",
+      "b": "qwen2.5-3b",
+      "b_count": 4,
+      "c_count": 27,
+      "p": 3.4e-05
+    }
+  ]
+}
