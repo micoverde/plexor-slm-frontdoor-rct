@@ -1,6 +1,6 @@
 % arXiv Preprint
-% Can Small Language Models Route? Benchmarking SLM Classifiers
-% for Production Front-Door Inference Routing
+% Evaluating Small Language Models for Front-Door Routing:
+% A Harmonized Benchmark and Pre-Registered Synthetic-Traffic Experiment
 % Article 8 in the TAAC Research Series
 
 \documentclass{article}
@@ -64,7 +64,7 @@
   \begin{tabular}[t]{c}%
 }
 
-\title{Can Small Language Models Route? Benchmarking SLM Classifiers\\for Production Front-Door Inference Routing}
+\title{Evaluating Small Language Models for Front-Door Routing:\\A Harmonized Benchmark and Pre-Registered Synthetic-Traffic Experiment}
 
 \author{
   Warren Johnson\thanks{Corresponding author. E-mail: \texttt{warrenjo@plexor.dev}}\\
@@ -83,7 +83,9 @@
 \maketitle
 
 \begin{abstract}
-We ask which small language model should serve as a front-door router that classifies prompts into a six-label task taxonomy for a production LLM inference system. In Study~1 (harmonized offline benchmark), three SLMs---Phi-3.5-mini (3.8B), Qwen2.5-1.5B (1.5B), and Qwen-2.5-3B (3.0B)---are evaluated on identical hardware, serving stack, and 60-case corpus. Qwen-2.5-3B achieves the highest accuracy (0.783) at $5.3\times$ lower latency than the statistically indistinguishable Phi-3.5-mini ($p = 0.503$) and is the only model with non-zero accuracy on all six families. In Study~2 (four-arm randomized experiment under synthetic traffic, $N = 400$/arm, $n_{\text{eff}} = 60$ unique cases for accuracy), Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 are compared against a no-routing control with pre-registered viable-region gates ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). No arm meets both gates: DeepSeek-V3 reaches 0.830 accuracy but fails on latency; Qwen-2.5-3B reaches 0.793 at sub-second latency and zero marginal cost; Phi-4-mini scores only 0.518. The pre-registered decision matrix recommends Qwen-2.5-3B as primary router with DeepSeek-V3 fallback. The 6--8 percentage point gap to standalone viability is a concrete target for fine-tuning, taxonomy refinement, or next-generation SLMs.
+Front-door routing uses a lightweight classifier to assign incoming prompts to downstream model and compression policies. We evaluate whether current small language models are accurate and fast enough to serve as standalone routers on a six-label taxonomy. Study~1 is a harmonized offline benchmark of Phi-3.5-mini, Qwen2.5-1.5B, and Qwen-2.5-3B on identical Azure T4 hardware, serving stack, quantization, and a fixed 60-case corpus. Qwen-2.5-3B achieves the best overall accuracy (0.783) and the strongest latency--accuracy tradeoff, and it is the only model with nonzero accuracy on all six task families. Study~2 is a pre-registered randomized experiment under synthetic traffic comparing Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 against a no-routing control. Because the same 60 prompts are repeated with deterministic decoding, the effective sample size for accuracy is 60 unique cases rather than 400 sessions per arm. DeepSeek-V3 attains the highest accuracy (0.830) but exceeds the pre-registered P95 latency gate (2,295\,ms), while Qwen-2.5-3B offers the best self-hosted tradeoff. No evaluated model meets the standalone viability criterion of at least 0.85 accuracy and at most 2,000\,ms P95 latency. These results support Qwen-2.5-3B as a practical primary router with selective fallback for hard cases and point to taxonomy refinement, task-specific fine-tuning, and hybrid routing as the main paths forward. Full end-to-end cost and compression evaluation remains future work because downstream routing was not executed in Study~2.
+
+\noindent\textit{Keywords:} model routing, small language models, front-door classification, randomized experiment, latency-quality tradeoff, Pareto frontier, reproducibility
 \end{abstract}
 
 \vspace{0.5em}
@@ -145,7 +147,7 @@ The overarching research question is: \emph{Which small language model backend m
 \emph{The 3B Qwen model achieves non-zero accuracy on all six task families, demonstrating breadth of coverage that smaller models lack.}
 \end{hypothesis}
 
-\textbf{Study~2 hypotheses (pre-registered, now validated).}
+\textbf{Study~2 hypotheses (pre-registered; partially testable under synthetic traffic).}
 
 \begin{hypothesis}[H5: Routing Accuracy (Treatment Arms Only)]
 \label{hyp:routing}
@@ -381,7 +383,7 @@ D & DeepSeek-V3 & DeepSeek-V3 (API) & DeepSeek commercial API & 671B MoE \\
 
 \textbf{Multiplicity hierarchy.}\quad The Holm-Bonferroni step-down procedure applies \emph{within} each hypothesis to the relevant pairwise arm comparisons. For H5 (routing accuracy) and H7 (F1), only treatment arms B, C, D are compared (three pairwise tests); for H6 (cost), H8 (latency), and H9 (compression), all four arms are compared (six pairwise tests). In either case, p-values are ranked and rejected at $p_{(i)} < \alpha / (k - i + 1)$ where $k$ is the number of comparisons, stopping at the first non-rejection. Between hypotheses (H5--H9), which test different endpoints, no additional correction is applied. This follows standard practice for multi-arm experiments where hypotheses address distinct endpoints \citep{schulz2010consort,kohavi2020trustworthy}.
 
-\textbf{Statistical analysis plan.}\quad Primary tests are: routing accuracy, defect rate, and F1 via $\chi^2$ test for proportions \citep{cochran1954} with Holm-Bonferroni correction; cost and compression ratio via Welch's $t$-test \citep{welch1947} with Holm-Bonferroni correction; P95 latency via bootstrap CI comparison \citep{efron1979bootstrap}. Subgroup analysis by task-label is exploratory (uncorrected, flagged if $p < 0.01$). Pareto frontier analysis is computed over (total\_cost\_per\_request, routing\_accuracy), extending the Article~6 methodology from (cost, fidelity) to (cost, routing\_accuracy).
+\textbf{Statistical analysis plan.}\quad Because accuracy reduces to the same 60 unique cases evaluated by each arm, treatment-vs-treatment accuracy comparisons (B\,vs.\,C, B\,vs.\,D, C\,vs.\,D) are paired at the case level and tested with exact McNemar's test \citep{mcnemar1947} with Holm-Bonferroni correction---matching the paired structure of Study~1. Latency and marginal front-door cost, where each of the 400 requests generates independent timing and billing data, are tested via Welch's $t$-test \citep{welch1947} with Holm-Bonferroni correction; P95 latency via bootstrap CI comparison \citep{efron1979bootstrap}. Subgroup analysis by task-label is exploratory (uncorrected, flagged if $p < 0.01$). Pareto frontier analysis is computed over (marginal\_front\-door\_cost, routing\_accuracy).
 
 \textbf{Cost-savings formalization.}\quad We formalize the break-even condition for routing following the Article~6 framework \citep{johnson2026rct}. For a stream of requests $t = 1, \ldots, T$, the net routing savings are
 \begin{equation}
@@ -477,7 +479,7 @@ We acknowledge that the partial reporting of pre-registered endpoints is a limit
 
 \begin{finding}[Qwen-2.5-3B Pareto Dominance]
 \label{find:qwen-pareto}
-\emph{Qwen-2.5-3B is Pareto-dominant among self-hosted models: it matches DeepSeek-V3 accuracy within $3.7$\,pp at $1.9\times$ lower latency ($988$\,ms vs.\ $1{,}854$\,ms) and zero marginal cost. Per the pre-registered tie-breaking rule (self-hosted $>$ serverless $>$ API), Qwen-2.5-3B is the recommended primary router.}
+\emph{Qwen-2.5-3B is Pareto-dominant among self-hosted models: it matches DeepSeek-V3 accuracy within $3.7$\,pp at $1.9\times$ lower latency ($988$\,ms vs.\ $1{,}854$\,ms) and zero marginal front-door cost. Per the pre-registered tie-breaking rule (self-hosted $>$ serverless $>$ API), Qwen-2.5-3B is the recommended primary router.}
 \end{finding}
 
 % ════════════════════════════════════════════════════════════════════
@@ -541,9 +543,9 @@ All software versions, corpus hashes, and execution metadata are documented in A
 
 This paper reports two complementary studies addressing the model-selection problem for production front-door routing. Study~1 (Harmonized Offline Benchmark) established, on identical hardware with exclusive GPU allocation, that Qwen-2.5-3B and Phi-3.5-mini achieve statistically indistinguishable accuracy ($0.783$ vs.\ $0.717$, $p = 0.503$) but Qwen-2.5-3B is $5.3\times$ faster, making it the Pareto-dominant offline candidate. The breadth-over-depth finding---Qwen-2.5-3B is the only model with non-zero accuracy on all six families---inverts the typical evaluation paradigm where peak performance dominates. Study~2 (Four-Arm Randomized Experiment, $N = 400$/arm, $n_{\text{eff}} = 60$ for accuracy) tested these offline findings under controlled synthetic traffic conditions and extended the evaluation to next-generation models. The central negative finding is that \emph{no evaluated model meets the pre-registered viable region} ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). DeepSeek-V3 (671B MoE) achieves the highest accuracy ($0.830$) but fails both gates. Per the pre-registered decision matrix, the recommended deployment is Qwen-2.5-3B as primary front-door with DeepSeek-V3 fallback for hard classifications.
 
-Together, these studies demonstrate an end-to-end methodology for evidence-based model selection: harmonized offline benchmarking followed by pre-registered production experimentation. The broader implication for the \taac{} research program is that the Article~1 dichotomy (compress code, route CoT) extends recursively---the model that implements the routing decision is itself subject to task-dependent quality-latency tradeoffs. The 85\% accuracy threshold remains unmet, suggesting three paths forward: (1)~fine-tuning via LoRA on classification-specific data; (2)~taxonomy simplification (reducing from 6 to 4 families by merging boundary-ambiguous categories); or (3)~ensemble methods combining SLM classification with LLM fallback.
+Together, these studies demonstrate a methodology for evidence-based model selection: harmonized offline benchmarking followed by pre-registered experimentation under synthetic traffic. The broader implication for the \taac{} research program is that the Article~1 dichotomy (compress code, route CoT) extends recursively---the model that implements the routing decision is itself subject to task-dependent quality-latency tradeoffs. The 85\% accuracy threshold remains unmet, suggesting three paths forward: (1)~fine-tuning via LoRA on classification-specific data; (2)~taxonomy simplification (reducing from 6 to 4 families by merging boundary-ambiguous categories); or (3)~hybrid routing combining SLM classification with LLM fallback for hard cases.
 
-The SLM-as-classifier paradigm is approaching but has not yet reached production viability. The finding that a 3B model achieves $\sim$79\% accuracy with sub-second latency and zero marginal cost confirms the economic premise of front-door routing while establishing that the accuracy gap to standalone deployment is approximately 6--8 percentage points. Closing this gap represents a concrete, measurable target for the next generation of SLM classifiers \citep{sculley2015debt,kohavi2020trustworthy}.
+The SLM-as-classifier paradigm is approaching but has not yet reached production viability. A 3B model achieves $\sim$79\% accuracy with sub-second latency and zero marginal front-door cost, but full end-to-end routing cost---including downstream model execution on correctly and incorrectly routed requests---was not evaluated in Study~2 and remains necessary to validate the economic premise of front-door routing. The accuracy gap to standalone deployment is approximately 6--8 percentage points, a concrete target for the next generation of SLM classifiers \citep{sculley2015debt,kohavi2020trustworthy}.
 
 % ════════════════════════════════════════════════════════════════════
 % ACKNOWLEDGMENTS
@@ -675,16 +677,17 @@ Study~2 pre-registration includes the design document (this paper, \S\ref{sec:rc
 \centering
 \caption{Pre-registered artifacts for Study~2, committed before experiment execution.}
 \label{tab:prereg-artifacts}
-\begin{tabular}{lp{5.5cm}l}
+\small
+\begin{tabular}{lp{7cm}p{3.5cm}}
 \toprule
 Artifact & File Path & Purpose \\
 \midrule
 Experiment design & \texttt{paper/main.tex} (\S\ref{sec:rct-design}) & Protocol specification \\
-Analysis script & \texttt{scripts/ab-test/rct\_cross\_arm\_analysis.py} & Endpoint analysis \\
+Analysis script & \texttt{scripts/ab-test/\allowbreak{}rct\_cross\_arm\_analysis.py} & Endpoint analysis \\
 Decision matrix & Table~\ref{tab:decision} (this paper) & Outcome $\to$ action map \\
 Hypothesis specs & H5--H9 (\S\ref{sec:hypotheses}) & Testable predictions \\
-Corpus (60-case) & \texttt{data/progressive\_test\_cases\_v2\_60.jsonl} & Evaluation corpus \\
-Benchmark script & \texttt{scripts/benchmark\_openweights.py} & Model evaluation driver \\
+Corpus (60-case) & \texttt{data/progressive\_test\_\allowbreak{}cases\_v2\_60.jsonl} & Evaluation corpus \\
+Benchmark script & \texttt{scripts/benchmark\_\allowbreak{}openweights.py} & Model evaluation driver \\
 \bottomrule
 \end{tabular}
 
