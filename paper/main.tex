@@ -84,9 +84,10 @@
 
 \begin{abstract}
 Front-door routing uses a lightweight classifier to assign incoming prompts to downstream model and compression policies. We evaluate whether current small language models are accurate and fast enough to serve as standalone routers on a six-label taxonomy. Study~1 is a harmonized offline benchmark of Phi-3.5-mini, Qwen2.5-1.5B, and Qwen-2.5-3B on identical Azure T4 hardware, serving stack, quantization, and a fixed 60-case corpus. Qwen-2.5-3B achieves the best overall accuracy (0.783) and the strongest latency--accuracy tradeoff, and it is the only model with nonzero accuracy on all six task families. Study~2 is a pre-registered randomized experiment under synthetic traffic comparing Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 against a no-routing control. Because the same 60 prompts are repeated with deterministic decoding, the effective sample size for accuracy is 60 unique cases rather than 400 sessions per arm. DeepSeek-V3 attains the highest accuracy (0.830) but exceeds the pre-registered P95 latency gate (2,295\,ms), while Qwen-2.5-3B offers the best self-hosted tradeoff. No evaluated model meets the standalone viability criterion of at least 0.85 accuracy and at most 2,000\,ms P95 latency. These results support Qwen-2.5-3B as a practical primary router with selective fallback for hard cases and point to taxonomy refinement, task-specific fine-tuning, and hybrid routing as the main paths forward. Full end-to-end cost and compression evaluation remains future work because downstream routing was not executed in Study~2.
-
-\noindent\textit{Keywords:} model routing, small language models, front-door classification, randomized experiment, latency-quality tradeoff, Pareto frontier, reproducibility
 \end{abstract}
+
+\vspace{0.3em}
+\noindent\textit{Keywords:} model routing, small language models, front-door classification, randomized experiment, latency--quality tradeoff, Pareto frontier, reproducibility
 
 \vspace{0.5em}
 \noindent\rule{\textwidth}{0.4pt}
