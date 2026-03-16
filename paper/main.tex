@@ -544,8 +544,6 @@ Together, these studies illustrate a methodology for evidence-based model select
 
 The SLM-as-classifier paradigm is approaching but has not yet reached production viability. A 3B model achieves $\sim$79\% accuracy with sub-second latency and zero marginal front-door cost, but full end-to-end routing cost---including downstream model execution on correctly and incorrectly routed requests---was not evaluated in Study~2 and remains necessary to validate the economic premise of front-door routing. The accuracy gap to standalone deployment is approximately 6--8 percentage points, a concrete target for the next generation of SLM classifiers \citep{sculley2015debt,kohavi2020trustworthy}.
 
-\paragraph{Note added in proof.} Subsequent work (Article~9 in this series) shows that the 6--8\,pp gap identified here can be closed through few-shot prompt engineering ($+8.2$\,pp) and targeted QLoRA fine-tuning on 469 examples ($+13.7$\,pp), achieving 89.0\% label accuracy and 91.8\% routing accuracy on a harder 80-case applied corpus with a seventh taxonomy label. The negative finding reported in this paper---that no off-the-shelf SLM meets the 85\% threshold---remains valid; the threshold was crossed only after task-specific adaptation.
-
 % ════════════════════════════════════════════════════════════════════
 % ACKNOWLEDGMENTS
 % ════════════════════════════════════════════════════════════════════
