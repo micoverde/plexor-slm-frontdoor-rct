@@ -1,6 +1,6 @@
 % arXiv Preprint
-% Front-Door Routing with Small Language Models: A Harmonized Benchmark
-% and Pre-Registered Randomized Experiment Reveal a 6-8 Point Gap to Production Viability
+% Can Small Language Models Route? Benchmarking SLM Classifiers
+% for Production Front-Door Inference Routing
 % Article 8 in the TAAC Research Series
 
 \documentclass{article}
@@ -64,7 +64,7 @@
   \begin{tabular}[t]{c}%
 }
 
-\title{Front-Door Routing with Small Language Models:\\A Harmonized Benchmark and Pre-Registered Randomized Experiment\\Reveal a 6--8 Point Gap to Production Viability}
+\title{Can Small Language Models Route? Benchmarking SLM Classifiers\\for Production Front-Door Inference Routing}
 
 \author{
   Warren Johnson\thanks{Corresponding author. E-mail: \texttt{warrenjo@plexor.dev}}\\
@@ -83,11 +83,7 @@
 \maketitle
 
 \begin{abstract}
-No current small language model---including a 671B mixture-of-experts architecture---meets the 85\% accuracy threshold required for standalone production front-door routing on a 6-class task taxonomy. We establish this through two complementary studies on a production LLM inference routing system.
-\textbf{Study~1 (Harmonized Offline Benchmark):} Three candidate SLMs---Phi-3.5-mini (3.8B), Qwen2.5-1.5B (1.5B), and Qwen-2.5-3B (3.0B)---evaluated on identical hardware (Azure T4), identical serving stack (vLLM 0.17.1, bitsandbytes 4-bit NF4), and identical 60-case corpus, with exclusive GPU allocation. Qwen-2.5-3B achieves the highest accuracy ($0.783$) with perfect parse rate and $1{,}088$\,ms median latency; pairwise McNemar tests confirm it is statistically indistinguishable from Phi-3.5-mini ($p = 0.503$) at $5.3\times$ lower latency. It is the only model achieving non-zero accuracy on all six task families.
-\textbf{Study~2 (Four-Arm Randomized Experiment, $N = 400$/arm, $n_{\text{eff}} = 60$ unique cases):} Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 evaluated against a no-routing control under synthetic traffic with SHA-256 session-ID randomization and pre-registered viable-region gates ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). Because traffic is generated from the same 60-case corpus with deterministic decoding, the effective sample size for accuracy is $n_{\text{eff}} = 60$, not 400; the larger $N$ supports latency and cost comparisons. DeepSeek-V3 achieves the highest accuracy ($0.830$) but fails both gates. Phi-4-mini scores only $0.518$---substantially below Phi-3.5-mini's harmonized result ($0.717$)---though this cross-study comparison confounds model version with prompt--tokenizer interactions and should be interpreted descriptively, not as evidence of architectural regression. Per the pre-registered decision matrix, the recommended deployment is Qwen-2.5-3B as primary front-door with DeepSeek-V3 fallback for hard classifications. The 6--8 percentage point gap to standalone viability represents a concrete target for fine-tuning, taxonomy refinement, or next-generation SLMs.
-
-\textbf{Keywords:} model routing, small language models, front-door classification, randomized controlled trial, latency-quality tradeoff, Pareto frontier, reproducibility
+We ask which small language model should serve as a front-door router that classifies prompts into a six-label task taxonomy for a production LLM inference system. In Study~1 (harmonized offline benchmark), three SLMs---Phi-3.5-mini (3.8B), Qwen2.5-1.5B (1.5B), and Qwen-2.5-3B (3.0B)---are evaluated on identical hardware, serving stack, and 60-case corpus. Qwen-2.5-3B achieves the highest accuracy (0.783) at $5.3\times$ lower latency than the statistically indistinguishable Phi-3.5-mini ($p = 0.503$) and is the only model with non-zero accuracy on all six families. In Study~2 (four-arm randomized experiment under synthetic traffic, $N = 400$/arm, $n_{\text{eff}} = 60$ unique cases for accuracy), Phi-4-mini, Qwen-2.5-3B, and DeepSeek-V3 are compared against a no-routing control with pre-registered viable-region gates ($\geq 0.85$ accuracy, $\leq 2{,}000$\,ms P95). No arm meets both gates: DeepSeek-V3 reaches 0.830 accuracy but fails on latency; Qwen-2.5-3B reaches 0.793 at sub-second latency and zero marginal cost; Phi-4-mini scores only 0.518. The pre-registered decision matrix recommends Qwen-2.5-3B as primary router with DeepSeek-V3 fallback. The 6--8 percentage point gap to standalone viability is a concrete target for fine-tuning, taxonomy refinement, or next-generation SLMs.
 \end{abstract}
 
 \vspace{0.5em}
