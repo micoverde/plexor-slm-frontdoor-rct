@@ -508,6 +508,17 @@ The results of the harmonized benchmark and four-arm randomized experiment, view
 
 \textbf{Implications for production architecture.}\quad The sub-2-second latency achieved by all self-hosted models in both studies suggests that SLM-based front-door classification is compatible with production latency requirements, adding minimal overhead relative to downstream generative inference (typically 5--30 seconds). The breadth advantage of Qwen-2.5-3B (Finding~\ref{find:taxonomy}) suggests that for production routing, a single generalist classifier is preferable to a committee of specialists, even if individual specialists achieve higher peak accuracy. The confidence overconfidence pattern argues against using model-reported confidence as a fallback trigger; instead, production systems should rely on external quality signals such as output structural validity or downstream task completion rate \citep{klaise2021alibi}. These architectural considerations intersect with the broader MLOps literature on model management and technical debt \citep{sculley2015debt,kreuzberger2023mlops}. The ideal front-door classifier would be robust to downstream model changes, requiring updates only when the task taxonomy itself evolves; our frozen-prompt, frozen-contract design approximates this ideal, but the extent to which it generalizes to new model families remains open.
 
+\subsection{Closing the Gap: Planned Remediation Paths}
+\label{sec:future}
+
+The 6--8 percentage point gap to the 85\% standalone viability threshold identified in this study represents a concrete and bounded target. Two remediation paths are under active investigation.
+
+First, the frozen zero-shot classifier prompt used throughout both studies is a conservative baseline. Few-shot prompting with boundary-case examples drawn from the error-corridor families identified in \S\ref{sec:discussion}---particularly the code$\to$hybrid and hybrid$\to$CoT boundaries---is expected to close a portion of the gap without any weight modification. The error corridor analysis in this paper directly informs the selection of few-shot examples: cases where the Pareto-dominant model's misclassifications cluster at family boundaries are the highest-value prompt additions.
+
+Second, supervised fine-tuning via parameter-efficient methods \citep{dettmers2023qlora} on the Pareto-dominant Qwen architecture is planned using a corpus of 400--500 labelled routing examples weighted toward the \emph{tier-crossing} boundaries where misclassification changes the routing outcome, not merely the label. The distinction between label accuracy and routing-outcome accuracy motivates a training objective focused on routing correctness rather than label correctness alone---a misclassification that preserves the correct routing tier is operationally harmless and should not be penalized equally during training.
+
+Both paths are designed to be evaluated against the same locked 60-case harmonized benchmark corpus (SHA \texttt{dac3aac5}) used in Studies~1 and~2, enabling direct comparison with the baselines reported here. A production-representative 80-case applied corpus with additional boundary cases and a seventh taxonomy label is also under development as a harder evaluation gate. Results from these remediation efforts will be reported in a subsequent article in this series.
+
 % ════════════════════════════════════════════════════════════════════
 % 8. THREATS TO VALIDITY
 % ════════════════════════════════════════════════════════════════════
